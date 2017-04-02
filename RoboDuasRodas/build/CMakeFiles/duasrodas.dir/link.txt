@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -std=c++0x -DBUILD_SHARED_LIBS=OFF -g   CMakeFiles/duasrodas.dir/main.cpp.o CMakeFiles/duasrodas.dir/remoteApi/extApi.c.o CMakeFiles/duasrodas.dir/remoteApi/extApiPlatform.c.o  -o duasrodas -rdynamic -lpthread 

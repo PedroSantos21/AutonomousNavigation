@@ -1,0 +1,7 @@
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/install.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/list_install_components.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/rebuild_cache.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/duasrodas.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/install/strip.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/install/local.dir
+/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build/CMakeFiles/edit_cache.dir

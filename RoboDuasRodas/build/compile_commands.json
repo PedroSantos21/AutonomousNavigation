@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build",
+  "command": "/usr/bin/c++   -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/include -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi   -Wall -std=c++0x -DBUILD_SHARED_LIBS=OFF -g   -o CMakeFiles/duasrodas.dir/main.cpp.o -c /home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/main.cpp",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/main.cpp"
+},
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build",
+  "command": "/usr/bin/cc  -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/include -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi  -g   -o CMakeFiles/duasrodas.dir/remoteApi/extApi.c.o   -c /home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi/extApi.c",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi/extApi.c"
+},
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/build",
+  "command": "/usr/bin/cc  -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/include -I/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi  -g   -o CMakeFiles/duasrodas.dir/remoteApi/extApiPlatform.c.o   -c /home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi/extApiPlatform.c",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/RoboDuasRodas/remoteApi/extApiPlatform.c"
+}
+]
