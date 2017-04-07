@@ -7,11 +7,17 @@ extern "C" {
 
 #include <iostream>
 #include <string>
-
+#include <ctime>
+#include <stdlib.h>  
+#include <time.h>
+#include <string.h>
+#include <stdio.h>
 using namespace std;
 
 int main(int argc, char **argv) 
 {
+  int start_s=clock();
+
   string serverIP = "127.0.0.1";
   int serverPort = 19999;
   int leftMotorHandle = 0;
@@ -19,14 +25,17 @@ int main(int argc, char **argv)
   int rightMotorHandle = 0;
   float vRight = 0;
   int sensorHandle;
-  float v0 = -2;
+  float v0 = -4;
   
   int objectHandle = 0;
   
-  bool temManequin = false;
-  
+  double tempoAnterior = 0;
+  double tempoAtual = 0;
+
   int clientID = simxStart((simxChar*)serverIP.c_str(),serverPort,true,true,2000,5);
-  
+                 
+  const simxChar *pathdoBloco = "/home/hudson/Documents/V-REP_PRO_EDU_V3_3_2_64_Linux/models/infrastructure/other/resizable concret block.ttm";
+
   if(simxStartSimulation(clientID, simx_opmode_oneshot)){
     cout << "Simulacao Iniciada" <<std::endl;
    }
@@ -54,53 +63,78 @@ int main(int argc, char **argv)
         simxReadProximitySensor(clientID,sensorHandle,NULL,NULL,NULL,NULL,simx_opmode_streaming);
       }else
           cout << "Handle do sensor nao encontrado!" << std::endl;
-          
-      
-      const simxChar *pathdoModelo = "/home/pedro/UFG/Engenharia de Computação/TCC/Controle Inteligente do Caminhar de Robôs Móveis Utilizando Algoritmo Genético e Redes Neurais/Simuladores/V-REP_PRO_EDU_V3_3_2_64_Linux/models/people/mannequin.ttm";
-      simxLoadModel(clientID,pathdoModelo, 1 , NULL, simx_opmode_blocking); 
-     
- 
-     
+               
     // desvio e velocidade do robô
     while(simxGetConnectionId(clientID)!=-1) // enquanto a simulação estiver ativa
     {     
-      vLeft = v0;
-      vRight = v0;
-      
-      // atualiza velocidades dos motores
+        vLeft = v0;
+        vRight = v0;
+        
+        // atualiza velocidades dos motores
 
-      simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
-      simxSetJointTargetVelocity(clientID, rightMotorHandle, (simxFloat) vRight, simx_opmode_streaming);
-       
-       simxUChar state;
-       simxFloat coord[3];
-       
-       if (simxReadProximitySensor(clientID,sensorHandle,&state,coord,NULL,NULL,simx_opmode_buffer)==simx_return_ok)
-       {
-            float dist = coord[2];
-            //printf("%f\n",dist);
-            if(dist < 0.05 && dist > 0.0){
-                 simxSetJointTargetVelocity(clientID, leftMotorHandle, 0.0, simx_opmode_streaming);
-                 simxSetJointTargetVelocity(clientID, rightMotorHandle, 0.0, simx_opmode_streaming);
-                
-                 extApi_sleepMs(500);
+        simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
+        simxSetJointTargetVelocity(clientID, rightMotorHandle, (simxFloat) vRight, simx_opmode_streaming);
+        
+        simxUChar state;
+        simxFloat coord[3];
+        
+        if (simxReadProximitySensor(clientID,sensorHandle,&state,coord,NULL,NULL,simx_opmode_buffer)==simx_return_ok)
+        {
+                float dist = coord[2];
+                //printf("%f\n",dist);
+                if(dist < 0.05 && dist > 0.0){
+                    simxSetJointTargetVelocity(clientID, leftMotorHandle, 0.0, simx_opmode_streaming);
+                    simxSetJointTargetVelocity(clientID, rightMotorHandle, 0.0, simx_opmode_streaming);
+                    
+                    extApi_sleepMs(500);
+                    
+                    simxSetJointTargetVelocity(clientID, leftMotorHandle,  (simxFloat) -vLeft, simx_opmode_streaming);
+                    simxSetJointTargetVelocity(clientID, rightMotorHandle, (simxFloat) -vRight, simx_opmode_streaming);
+                    
+                    extApi_sleepMs(500);
 
-                 simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
-                 simxSetJointTargetVelocity(clientID, rightMotorHandle,(simxFloat) -vRight, simx_opmode_streaming);
-                 extApi_sleepMs(500);
-            }      
-       }
-       
-          if(!temManequin){
-     if(simxGetObjectHandle(clientID,(const simxChar*) "mannequin",(simxInt *) &objectHandle, (simxInt) simx_opmode_oneshot_wait) == simx_return_ok)
-      cout << "LEIIIIIIIIII....TÃO" << std::endl;
-    else
-       cout << "leitoagem do HUdson detectada" << std::endl;  
-    simxFloat pos[] = {1,0,0};
+                    simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
+                    simxSetJointTargetVelocity(clientID, rightMotorHandle,(simxFloat) -vRight, simx_opmode_streaming);
+                    extApi_sleepMs(500);
+                }      
+        }
     
-    simxSetObjectPosition(clientID, objectHandle, -1, pos, simx_opmode_oneshot); 
-    temManequin = true;
-    } 
+        
+                int stop_s=clock();
+                int blockCounter = 0;
+                bool temBloco = false;
+                tempoAtual = (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
+                int sort = rand()%100+1;
+                
+                if(sort > 60 && (tempoAtual-tempoAnterior)>1000){
+                    simxFloat posx = rand() % 20 + 1;
+                    simxFloat posy = rand() % 20 + 1;
+                    simxLoadModel(clientID,pathdoBloco, 1 , NULL, simx_opmode_blocking);                 
+                    simxChar nome[80];
+                    
+                    strcpy (nome,"ConcretBlock");
+                    if(temBloco){
+                        simxChar numero[32];
+                        strcat (nome,"#");
+                        sprintf(numero, "%d", blockCounter);
+                        strcat (nome, numero);
+                        blockCounter++;
+                    }
+                  
+                    
+                    if(simxGetObjectHandle(clientID,(const simxChar*) nome,(simxInt *) &objectHandle, (simxInt) simx_opmode_oneshot_wait) == simx_return_ok){
+                            cout << "Bloco adicionado" << std::endl;
+                              temBloco = true;
+                    }
+                    else
+                            cout << "Handle do bloco não detectado" << std::endl;  
+                    
+                    simxFloat pos[] = {posx/10,posy/10,0.3};
+                    cout<< "x: "<< posx/10 << " y: " << posy/10 << std::endl;
+                    simxSetObjectPosition(clientID, objectHandle, -1, pos, simx_opmode_oneshot); 
+                    tempoAnterior = tempoAtual;
+                }
+                        
     }
     simxFinish(clientID); // fechando conexao com o servidor
     cout << "Conexao fechada!" << std::endl;
