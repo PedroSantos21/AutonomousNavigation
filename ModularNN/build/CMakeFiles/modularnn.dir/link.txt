@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -std=c++0x -DBUILD_SHARED_LIBS=OFF -g   CMakeFiles/modularnn.dir/main.cpp.o CMakeFiles/modularnn.dir/remoteApi/extApi.c.o CMakeFiles/modularnn.dir/remoteApi/extApiPlatform.c.o  -o modularnn -rdynamic -lpthread 

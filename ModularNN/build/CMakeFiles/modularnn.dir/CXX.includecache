@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/v_repConst.h
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include/v_repConst.h
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp
+remoteApi/extApi.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.h
+include/v_repConst.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include/v_repConst.h
+remoteApi/extApiPlatform.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApiPlatform.h
+iostream
+-
+fstream
+-
+string
+-
+ctime
+-
+stdlib.h
+-
+time.h
+-
+string.h
+-
+stdio.h
+-
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.h
+extApiPlatform.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApiPlatform.h
+v_repConst.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/v_repConst.h
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApiPlatform.h
+stdint.h
+-
+

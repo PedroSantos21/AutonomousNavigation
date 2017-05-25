@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/v_repConst.h
+
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/main.cpp
+remoteApi/extApi.h
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/remoteApi/extApi.h
+iostream
+-
+string
+-
+
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/remoteApi/extApi.h
+extApiPlatform.h
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/remoteApi/extApiPlatform.h
+v_repConst.h
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/remoteApi/v_repConst.h
+
+/home/hudson/Desktop/UFG/TCC/CPPTesteMotores/remoteApi/extApiPlatform.h
+stdint.h
+-
+

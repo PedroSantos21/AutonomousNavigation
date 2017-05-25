@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/build",
+  "command": "/usr/bin/c++   -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi   -Wall -std=c++0x -DBUILD_SHARED_LIBS=OFF -g   -o CMakeFiles/modularnn.dir/main.cpp.o -c /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp"
+},
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/build",
+  "command": "/usr/bin/cc  -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi  -g   -o CMakeFiles/modularnn.dir/remoteApi/extApi.c.o   -c /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.c",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.c"
+},
+{
+  "directory": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/build",
+  "command": "/usr/bin/cc  -DMAX_EXT_API_CONNECTIONS=255 -DNON_MATLAB_PARSING -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include -I/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi  -g   -o CMakeFiles/modularnn.dir/remoteApi/extApiPlatform.c.o   -c /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApiPlatform.c",
+  "file": "/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApiPlatform.c"
+}
+]
