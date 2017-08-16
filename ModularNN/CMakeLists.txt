@@ -15,6 +15,7 @@ set(SOURCES
     remoteApi/extApi.c
     #remoteApi/extApiCustom.c
     remoteApi/extApiPlatform.c
+   
 )
  
 set(HEADERS
@@ -24,6 +25,7 @@ set(HEADERS
     remoteApi/extApiPlatform.h
     include/v_repConst.h
     include/v_repLib.h
+    Cinematica.h
 )
 include_directories("include/")
 include_directories("remoteApi/")

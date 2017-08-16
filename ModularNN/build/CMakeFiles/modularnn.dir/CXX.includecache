@@ -8,6 +8,24 @@
 
 ../include/v_repConst.h
 
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.cpp
+Cinematica.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.h
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.h
+math.h
+-
+stdio.h
+-
+stdlib.h
+-
+cmath
+-
+iostream
+-
+thread
+-
+
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include/v_repConst.h
 
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp
@@ -33,6 +51,10 @@ string.h
 -
 stdio.h
 -
+thread
+-
+Cinematica.cpp
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.cpp
 
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.h
 extApiPlatform.h
