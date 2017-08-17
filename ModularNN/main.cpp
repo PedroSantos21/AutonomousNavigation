@@ -16,8 +16,10 @@ extern "C" {
 #include <string.h>
 #include <stdio.h>
 #include <thread> 
-#include "Cinematica.cpp"
+#include <array>
 
+#include "Cinematica.cpp"
+#include "RedeNeuralModular.cpp"
 using namespace std;
 int start_s=clock();
 string serverIP = "127.0.0.1";
@@ -30,15 +32,16 @@ string sensorNome[8];
 int sensorHandle[8];
 double tempoAnterior = 0;
 double tempoAtual = 0;
+float leituras[8];
 
 void exec(int clientID){
-    float detect[8]={0,0,0,0,0,0,0,0};
     int stop_s=clock();
     
 
     Cinematica *cinematica = new Cinematica(0.415);
     thread thCinematica(&Cinematica::run, cinematica);
-
+    RedeNeuralModular *rnm = new RedeNeuralModular();
+    //cout << "PORRA" <<endl;
     //ofstream myfile; 
     //myfile.open("teste.txt");
     //  Loop principal
@@ -49,10 +52,10 @@ void exec(int clientID){
     {     
         tempoAtual = (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         
-        cinematica->setVelocidades(vRight, vLeft);
+        //cinematica->setVelocidades(vRight, vLeft);
         
-        simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
-        simxSetJointTargetVelocity(clientID, rightMotorHandle, (simxFloat) vRight, simx_opmode_streaming);
+        //simxSetJointTargetVelocity(clientID, leftMotorHandle, (simxFloat) vLeft, simx_opmode_streaming);
+        //simxSetJointTargetVelocity(clientID, rightMotorHandle, (simxFloat) vRight, simx_opmode_streaming);
         
 
         //if(tempoAtual-tempoAnterior > 10){ 
@@ -64,7 +67,7 @@ void exec(int clientID){
            if(simxReadProximitySensor(clientID, sensorHandle[i] ,&state, coord,NULL,NULL,simx_opmode_buffer)==simx_return_ok){
                         
                         float dist = coord[2];
-                        
+                        leituras[i] = dist;
                         if(state == 0){
                             dist = 5;
                         }
@@ -76,10 +79,23 @@ void exec(int clientID){
             }
                     tempoAnterior = tempoAtual;
         }
+            
+        for(int i = 0; i < 8; i++){
+            leituras[i] = leituras[i]/5;
+        }
+        rnm->setLeituras(leituras);
+        for(int k = 0; k < 8; k++){
+            cout << "Leitura " << k << ": "<< leituras[k] << endl;
+        }
+        
+        int padrao = rnm->definePadrao();
+        cout <<"Padrao: " << padrao << endl;
+        
                             
     }
    thCinematica.join();
 }
+
 
 int main(int argc, char **argv){
   

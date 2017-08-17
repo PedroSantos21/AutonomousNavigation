@@ -26,6 +26,8 @@ set(HEADERS
     include/v_repConst.h
     include/v_repLib.h
     Cinematica.h
+    Modulo.h
+    RedeNeuralModular.h
 )
 include_directories("include/")
 include_directories("remoteApi/")

@@ -13,6 +13,10 @@ CMakeFiles/modularnn.dir/remoteApi/extApiPlatform.c.o: ../remoteApi/extApiPlatfo
 CMakeFiles/modularnn.dir/main.cpp.o: ../include/v_repConst.h
 CMakeFiles/modularnn.dir/main.cpp.o: ../Cinematica.cpp
 CMakeFiles/modularnn.dir/main.cpp.o: ../Cinematica.h
+CMakeFiles/modularnn.dir/main.cpp.o: ../Modulo.cpp
+CMakeFiles/modularnn.dir/main.cpp.o: ../Modulo.h
+CMakeFiles/modularnn.dir/main.cpp.o: ../RedeNeuralModular.cpp
+CMakeFiles/modularnn.dir/main.cpp.o: ../RedeNeuralModular.h
 CMakeFiles/modularnn.dir/main.cpp.o: ../include/v_repConst.h
 CMakeFiles/modularnn.dir/main.cpp.o: ../main.cpp
 CMakeFiles/modularnn.dir/main.cpp.o: ../remoteApi/extApi.h

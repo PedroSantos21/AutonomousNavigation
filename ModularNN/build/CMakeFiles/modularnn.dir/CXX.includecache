@@ -26,6 +26,32 @@ iostream
 thread
 -
 
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.cpp
+Modulo.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.h
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.h
+math.h
+-
+stdio.h
+-
+stdlib.h
+-
+cmath
+-
+iostream
+-
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.cpp
+RedeNeuralModular.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.h
+Modulo.cpp
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.cpp
+
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.h
+Modulo.h
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.h
+
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include/v_repConst.h
 
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp
@@ -53,8 +79,12 @@ stdio.h
 -
 thread
 -
+array
+-
 Cinematica.cpp
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.cpp
+RedeNeuralModular.cpp
+/home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.cpp
 
 /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.h
 extApiPlatform.h

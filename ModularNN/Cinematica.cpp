@@ -34,9 +34,9 @@ void Cinematica::update(){
     float dY = ((velDir + velEsq)*sin(radians(theta))/2)*INTERVALO/1000.0;
     ypos += dY;
     
-    cout << "x: " << xpos;
+    /*cout << "x: " << xpos;
     cout << " y: " << ypos;
-    cout << " theta: " << theta << endl;
+    cout << " theta: " << theta << endl;*/
     this_thread::sleep_for(chrono::milliseconds(INTERVALO));
 }
 

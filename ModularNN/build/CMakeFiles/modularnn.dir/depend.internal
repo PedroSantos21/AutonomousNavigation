@@ -14,6 +14,10 @@ CMakeFiles/modularnn.dir/main.cpp.o
  ../include/v_repConst.h
  /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.cpp
  /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Cinematica.h
+ /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.cpp
+ /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/Modulo.h
+ /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.cpp
+ /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/RedeNeuralModular.h
  /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/include/v_repConst.h
  /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/main.cpp
  /home/hudson/Desktop/UFG/TCC/Códigos/ModularNN/remoteApi/extApi.h
