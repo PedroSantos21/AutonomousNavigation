@@ -1,6 +1,7 @@
 #ifndef REDENEURALMODULAR_H
 #define REDENEURALMODULAR_H
 #include "Modulo.h"
+#include<string>
 
 #define NUM_MODULOS 9 
 #define NUM_SENSORES 8
@@ -8,6 +9,7 @@ class RedeNeuralModular{
     
 private:
     float leituras[NUM_SENSORES];
+      
     
     float padroes1[NUM_SENSORES] = {1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000};
     float padroes2[NUM_SENSORES] = {0.1490, 0.1923, 0.3017, 0.7409, 0.7360, 0.2475, 0.1574, 0.1216};
@@ -19,6 +21,11 @@ private:
     float padroes8[NUM_SENSORES] = {1.0000, 1.0000, 0.8589, 0.1315, 0.1315, 0.8632, 1.0000, 1.0000};
     float padroes9[NUM_SENSORES] = {0.0497, 0.0508, 0.0367, 0.0291, 0.0291, 0.0368, 0.0391, 0.0316};
     
+    float davg;
+    float threshold;
+    bool padraoEncontrado;
+    
+    Modulo *modulo[NUM_MODULOS];
     Modulo *modulo1;
     Modulo *modulo2;
     Modulo *modulo3;
@@ -28,14 +35,20 @@ private:
     Modulo *modulo7;
     Modulo *modulo8;
     Modulo *modulo9;
-    
+        
     float distanciaEuclidiana(float *, float *);
-
+    float distancias[NUM_MODULOS];
+    
+    float pesos[NUM_MODULOS];
+    
 public:
     RedeNeuralModular();
+    float calculaDAvg();
     int definePadrao();
+    string padraoAlfaNumerico(int);
     void setLeituras(float *);
-
+    float getThreshold();
+    float *calculaPesos(int);
 };
 
 #endif

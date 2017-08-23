@@ -41,10 +41,7 @@ void exec(int clientID){
     Cinematica *cinematica = new Cinematica(0.415);
     thread thCinematica(&Cinematica::run, cinematica);
     RedeNeuralModular *rnm = new RedeNeuralModular();
-    //cout << "PORRA" <<endl;
-    //ofstream myfile; 
-    //myfile.open("teste.txt");
-    //  Loop principal
+
     
     vRight = 1;
     vLeft = 1;
@@ -66,32 +63,36 @@ void exec(int clientID){
        
            if(simxReadProximitySensor(clientID, sensorHandle[i] ,&state, coord,NULL,NULL,simx_opmode_buffer)==simx_return_ok){
                         
-                        float dist = coord[2];
-                        leituras[i] = dist;
-                        if(state == 0){
-                            dist = 5;
-                        }
+                    float dist = coord[2];
+
+                    if(state == 0.0){
+                        dist = 5.0;
+                    }
+                    
+                    leituras[i] = dist;
+
                         
-                      if(dist < 0.1 ){
-                            vRight = 1;
-                            vLeft =  -1;
-                      }
+                    if(dist < 0.1 ){
+                        vRight = 1;
+                        vLeft =  -1;
+                    }
             }
                     tempoAnterior = tempoAtual;
         }
             
-        for(int i = 0; i < 8; i++){
+        for(int i = 0; i < 8; i++) {
             leituras[i] = leituras[i]/5;
         }
         rnm->setLeituras(leituras);
         for(int k = 0; k < 8; k++){
-            cout << "Leitura " << k << ": "<< leituras[k] << endl;
+      //      cout << "Leitura  Sensor " << (k+1) << ": "<< leituras[k] << endl;
         }
         
         int padrao = rnm->definePadrao();
-        cout <<"Padrao: " << padrao << endl;
-        
-                            
+        float padroes[9];
+        for(int i = 0; i < 9; i++){
+            cout << "Peso " << rnm->padraoAlfaNumerico(i+1) << ": "<< rnm->calculaPesos(padrao)[i] << endl;      
+        }                   
     }
    thCinematica.join();
 }
@@ -148,4 +149,3 @@ int main(int argc, char **argv){
     cout << "Problemas para conectar o servidor!" << std::endl;
   return 0;
 }
-
