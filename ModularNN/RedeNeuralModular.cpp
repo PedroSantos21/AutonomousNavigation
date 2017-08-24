@@ -37,7 +37,7 @@ float RedeNeuralModular::calculaDAvg(){
     
     for(int i = 0; i < NUM_MODULOS; i++){
         for(int j = 0; j < NUM_MODULOS; j++){
-            davg += distanciaEuclidiana(modulo[i]->getPadrao(), modulo[j]->getPadrao());
+            davg += distanciaEuclidiana(modulo[i]->getPadrao(), modulo[j]->getPadrao(), NUM_SENSORES);
         }   
     }
     
@@ -56,7 +56,9 @@ int RedeNeuralModular::definePadrao(){
     float menorDist = 1000;
     
     for(int i = 0; i < NUM_MODULOS; i++){
-            distancias[i] = distanciaEuclidiana(modulo[i]->getPadrao(), leituras);
+            distancias[i] = distanciaEuclidiana(modulo[i]->getPadrao(), leituras, NUM_SENSORES);
+          //  cout << "Distancia " << i+1 << ": " << distancias[i] << endl;
+
     }
     
     
@@ -111,11 +113,12 @@ string RedeNeuralModular::padraoAlfaNumerico(int padrao){
     return padraoAlfa;
 }
 
-float RedeNeuralModular::distanciaEuclidiana(float * vetor1, float * vetor2){
+float RedeNeuralModular::distanciaEuclidiana(float * vetor1, float * vetor2, int size){
     float sum = 0;
-    for(int i = 0; i < sizeof(vetor1)/sizeof(float); i++){
+    for(int i = 0; i < size; i++){
         sum += pow((vetor1[i]-vetor2[i]),2);
     }
+    
     return sqrt(sum);
 }
 

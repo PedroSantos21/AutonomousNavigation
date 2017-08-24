@@ -18,8 +18,8 @@ private:
     float padroes5[NUM_SENSORES] = {0.5578, 0.7116, 0.6337, 0.5647, 0.2460, 0.0820, 0.0454, 0.0327};
     float padroes6[NUM_SENSORES] = {0.0534, 0.2330, 0.3011, 0.3213, 0.3228, 0.3609, 0.2754, 0.2172};
     float padroes7[NUM_SENSORES] = {0.2244, 0.2917, 0.3518, 0.3134, 0.3154, 0.2722, 0.3010, 0.0573};
-    float padroes8[NUM_SENSORES] = {1.0000, 1.0000, 0.8589, 0.1315, 0.1315, 0.8632, 1.0000, 1.0000};
-    float padroes9[NUM_SENSORES] = {0.0497, 0.0508, 0.0367, 0.0291, 0.0291, 0.0368, 0.0391, 0.0316};
+    float padroes8[NUM_SENSORES] = {1.0000, 1.0000, 0.9194, 0.1323, 0.1324, 0.8444, 1.0000, 1.0000};
+    float padroes9[NUM_SENSORES] = {0.0401, 0.0523, 0.3796, 0.0983, 0.0984, 0.3799, 0.0539, 0.0406};
     
     float davg;
     float threshold;
@@ -36,7 +36,7 @@ private:
     Modulo *modulo8;
     Modulo *modulo9;
         
-    float distanciaEuclidiana(float *, float *);
+    float distanciaEuclidiana(float *, float *, int);
     float distancias[NUM_MODULOS];
     
     float pesos[NUM_MODULOS];

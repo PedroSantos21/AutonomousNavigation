@@ -21,6 +21,7 @@ extern "C" {
 #include "Cinematica.cpp"
 #include "RedeNeuralModular.cpp"
 using namespace std;
+bool fimDeLinha = false;
 int start_s=clock();
 string serverIP = "127.0.0.1";
 int serverPort = 19999;
@@ -45,8 +46,12 @@ void exec(int clientID){
     
     vRight = 1;
     vLeft = 1;
+    ofstream myfile; 
+  //  myfile.open("teste.txt");
+
     while(simxGetConnectionId(clientID)!=-1) // enquanto a simulação estiver ativa
-    {     
+    { 
+        int stop_s=clock();
         tempoAtual = (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         
         //cinematica->setVelocidades(vRight, vLeft);
@@ -70,12 +75,23 @@ void exec(int clientID){
                     }
                     
                     leituras[i] = dist;
-
-                        
-                    if(dist < 0.1 ){
-                        vRight = 1;
-                        vLeft =  -1;
+                    
+               /*     if(dist < 0){
+                            myfile << 0 << ";";    
+                            cout << 0 << " ";                                            
+                    }else{
+                            myfile << dist <<";";    
+                            cout << dist << " ";                                            
                     }
+                
+                    if(i+1 == 8){
+                        fimDeLinha = true;
+                          printf("\n");
+                          myfile <<""<<endl;    
+                     } else {
+                          fimDeLinha = false;
+                     }
+                   */
             }
                     tempoAnterior = tempoAtual;
         }
@@ -85,7 +101,7 @@ void exec(int clientID){
         }
         rnm->setLeituras(leituras);
         for(int k = 0; k < 8; k++){
-      //      cout << "Leitura  Sensor " << (k+1) << ": "<< leituras[k] << endl;
+            cout << "Leitura  Sensor " << (k+1) << ": "<< leituras[k] << endl;
         }
         
         int padrao = rnm->definePadrao();
@@ -95,6 +111,7 @@ void exec(int clientID){
         }                   
     }
    thCinematica.join();
+    
 }
 
 
