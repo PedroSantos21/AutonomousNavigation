@@ -9,6 +9,8 @@ sensorHandle = []
 dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
+v_Left = 2
+v_Right = 2
 
 if (clientID!=-1):
 	print ("Servidor Conectado!")
@@ -25,17 +27,19 @@ if (clientID!=-1):
 			#vrep.simxReadProximitySensor(clientID,sensorHandle, None, None, None, None, vrep.simx_opmode_streaming)
 			print (nomeSensor[i] + " conectado")
 			sensorHandle.append(handle)
+
 #------------------------------Inicializa Motores ----------------------------
-	resLeft, handleLeft = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_leftMotor", vrep.simx_opmode_oneshot_wait)
+	resLeft, leftMotorHandle = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_leftMotor", vrep.simx_opmode_oneshot_wait)
 	if(resLeft != vrep.simx_return_ok):
-		print("Handle do motor esquerdo nao encontrado!")
+		print("Motor Esquerdo : Handle nao encontrado!")
 	else:
-		print("Conectado ao motor esquerdo!")
-	resRight, handleRight = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_rightMotor", vrep.simx_opmode_oneshot_wait)
+		print("Motor Esquerdo: Conectado")
+
+	resRight, rightMotorHandle = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_rightMotor", vrep.simx_opmode_oneshot_wait)
 	if(resRight != vrep.simx_return_ok):
-		print("Handle do motor direito nao encontrado!")
+		print("Motor Direito: Handle nao encontrado!")
 	else:
-		print("Conectado ao motor direito!")
+		print("Motor Direito: Conectado")
 else:
 	print ("Servidor nao conectado!")
 
@@ -53,3 +57,6 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		else:
 			print ("Error on sensor "+str(i+1))
 		time.sleep(0.1)
+
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
