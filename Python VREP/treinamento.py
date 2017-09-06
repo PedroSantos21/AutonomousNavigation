@@ -1,5 +1,8 @@
 import vrep
 import time
+from pynput import keyboard
+
+
 serverIP = "127.0.0.1"
 serverPort = 19999
 #---------------------Conecta no servidor---------------------------------
@@ -9,9 +12,40 @@ sensorHandle = []
 dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
-v_Left = 2
-v_Right = 2
+global v_Left, v_Right
+v_Left = 1
+v_Right = 1
 
+def on_press(key):
+    try:
+        #print('alphanumeric key {0} pressed'.format(key.char))
+	"""
+        if key == keyboard.Key.up:
+        	v_Left = 1
+		v_Right = 1
+	elif key == keyboard.Key.down:
+        	v_Left = -1
+		v_Right = -1
+	"""
+	if key == keyboard.Key.left:
+        	v_Left = -0.5
+		v_Right = 0.5
+	elif key == keyboard.Key.right:
+        	v_Left = 0.5
+		v_Right = -0.5		
+	elif key == keyboard.Key.esc:
+		# Stop listener
+		return False	
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
+        
+    except AttributeError:
+        print('special key {0} pressed'.format(key))
+        
+def on_release(key):
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, 1, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, 1, vrep.simx_opmode_streaming)
+        
 if (clientID!=-1):
 	print ("Servidor Conectado!")
 
@@ -43,7 +77,8 @@ if (clientID!=-1):
 else:
 	print ("Servidor nao conectado!")
 
-
+vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
+vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
 	for i in range(0,8):
@@ -53,10 +88,14 @@ while vrep.simxGetConnectionId(clientID) != -1:
 				dist.append(detectedPoint[2])
 			else:
 				dist.append(5.0)
-			print(dist[i])
-		else:
-			print ("Error on sensor "+str(i+1))
+			#print(dist[i])
+		#else:
+			#print ("Error on sensor "+str(i+1))
 		time.sleep(0.1)
 
-	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
-	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
+	
+	# Collect events until released
+	with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+	    listener.join()
+
+
