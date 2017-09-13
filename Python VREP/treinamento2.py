@@ -1,8 +1,8 @@
 import vrep
 import time
-import cinematica
+import localization
 import math
-from threading import Thread
+import thread
 from pynput import keyboard
 
 
@@ -15,9 +15,15 @@ sensorHandle = []
 dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
-global v_Left, v_Right
+global v_Left, v_Right, tacoDir, tacoEsq
 v_Left = 0
 v_Right = 0
+raio = 0.195/2
+
+def listen_keyboard():
+	# Collect events until released
+	with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
+		listener.join()
 
 def on_press(key):
     try:
@@ -36,9 +42,7 @@ def on_press(key):
 
 	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
 	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-
-    	#localizacao.setVelocidades(velDir, velEsq)
-
+    	localizacao.setAngulos(thetaDir, thetaEsq)
 
     except AttributeError:
 	print('special key {0} pressed'.format(key))
@@ -49,8 +53,9 @@ def on_release(key):
 
   	#thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
 	#thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-    	#localizacao.setVelocidades(v_Right, v_Left)
-
+    	#localizacao.setAngulos(,)
+	#print str(thetaDir)+" "+str(thetaEsq)
+	
 if (clientID!=-1):
 	print ("Servidor Conectado!")
 
@@ -63,7 +68,6 @@ if (clientID!=-1):
 		if(res != vrep.simx_return_ok):
 			print (nomeSensor[i] + " nao conectado")
 		else:
-			#vrep.simxReadProximitySensor(clientID,sensorHandle, None, None, None, None, vrep.simx_opmode_streaming)
 			print (nomeSensor[i] + " conectado")
 			sensorHandle.append(handle)
 
@@ -84,19 +88,16 @@ else:
 
 	
 #-----------------Inicializa localizacao------------------
-#keyboard = KeyboardControl()
-#keyboard.start()
-
-localizacao = cinematica.localizacao()
-cinematica.iniciar(clientID)
+localizacao = localization.localizacao()
+localization.iniciar(clientID)
 
 #---------------------Seta velocidades nos motores-----------------------
 vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
-localizacao.setVelocidades(v_Right, v_Left)
+#localizacao.setVelocidades(v_Right, v_Left)
 
-thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
-thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+#thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+#thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
 
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
@@ -111,8 +112,6 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#else:
 			#print ("Error on sensor "+str(i+1))
 		time.sleep(0.1)
-		# Collect events until released
-		with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
-			listener.join()
-		    
+	
+	thread.start_new_thread(listen_keyboard,())
 
