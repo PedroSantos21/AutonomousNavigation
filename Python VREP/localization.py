@@ -10,8 +10,8 @@ class localizacao(Thread):
 		global thetaDir, thetaEsq, thetaDirAnt, thetaEsqAnt, xpos, ypos, theta, Dr, Dl
 		thetaDir = 0 
 		thetaEsq = 0 
-		thetaDirAnt = thetaDir
-		thetaEsqAnt = thetaEsq
+		thetaDirAnt = 0
+		thetaEsqAnt = 0
 		xpos = 0
 		ypos = 0
 		theta = 0
@@ -20,7 +20,7 @@ class localizacao(Thread):
 		
 		self.largura = 0.415
 		self.raio = 0.195/2
-		self.intervalo = 10.0/1000.0
+		self.intervalo = 100.0/1000.0
 
 	def setAngulos (self, thetaD, thetaE):
 		global thetaDir, thetaEsq
@@ -31,19 +31,30 @@ class localizacao(Thread):
 
 	def update(self):
 		global thetaDir, thetaEsq, thetaDirAnt, thetaEsqAnt, xpos, ypos, theta, Dr, Dl
+
+		#theta = math.tan(math.sin(thetaDir)/math.cos(thetaDir))
 		
-		dThetaDir = thetaDir-thetaDirAnt
+		thetaDir = (thetaDir+2*math.pi)%(2*math.pi)
+		thetaEsq = (thetaEsq+2*math.pi)%(2*math.pi)
+		
+		#print "TetaD: "+str(thetaDir)+"TetaE: "+str(thetaEsq)
+		
+		dThetaDir = thetaDir - thetaDirAnt
 		dThetaEsq = thetaEsq - thetaEsqAnt
-		print str(dThetaDir)+" "+str(dThetaEsq)
-		Dr = (thetaDir-thetaDirAnt)*self.raio
-		Dl = (thetaEsq-thetaEsqAnt)*self.raio		
+		print "ThetaDir "+str(thetaDir)+" ThetaDirAnt "+str(thetaDirAnt)
+		
+		#print "DTetaD: "+str(dThetaDir)+" DTetaE: "+str(dThetaEsq)
+		
+		Dr = dThetaDir*self.raio
+		Dl = dThetaEsq*self.raio		
 		Dc = (Dl+Dr)/2
 		
-		#print str(Dr)+","+str(Dl)
+		#print "Dr: "+str(Dr)+"Dl: "+str(Dl)
 		
 		xpos = xpos+Dc*math.cos(theta)		
 		ypos = ypos+Dc*math.sin(theta)
 		theta = theta + (Dr-Dl)/self.largura
+		
 		
 		thetaDirAnt = thetaDir
 		thetaEsqAnt = thetaEsq

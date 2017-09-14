@@ -28,11 +28,11 @@ def listen_keyboard():
 def on_press(key):
     try:
 	if key == keyboard.Key.left:
-		velEsq = -0.5
-		velDir = 0.5
+		velEsq = -0.3
+		velDir = 0.3
 	elif key == keyboard.Key.right:
-		velEsq = 0.5
-		velDir = -0.5
+		velEsq = 0.3
+		velDir = -0.3
 	elif key == keyboard.Key.esc:
 		# Stop listener
 		sys.exit(0)
@@ -51,10 +51,10 @@ def on_release(key):
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
-  	#thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
-	#thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-    	#localizacao.setAngulos(,)
-	#print str(thetaDir)+" "+str(thetaEsq)
+	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+
+	localizacao.setAngulos(thetaDir, thetaEsq)
 	
 if (clientID!=-1):
 	print ("Servidor Conectado!")
@@ -94,10 +94,12 @@ localization.iniciar(clientID)
 #---------------------Seta velocidades nos motores-----------------------
 vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
-#localizacao.setVelocidades(v_Right, v_Left)
 
-#thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
-#thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+
+localizacao.setAngulos(thetaDir, thetaEsq)
+
 
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
@@ -114,4 +116,3 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		time.sleep(0.1)
 	
 	thread.start_new_thread(listen_keyboard,())
-
