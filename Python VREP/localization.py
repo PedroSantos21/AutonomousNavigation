@@ -9,18 +9,17 @@ class localizacao(Thread):
 		Thread.__init__(self)
 		global thetaDir, thetaEsq, thetaDirAnt, thetaEsqAnt, xpos, ypos, theta, Dr, Dl
 		thetaDir = 0 
-		thetaEsq = 0 
+		thetaEsq = 2*math.pi
 		thetaDirAnt = 0
-		thetaEsqAnt = 0
+		thetaEsqAnt = 2*math.pi
 		xpos = 0
 		ypos = 0
 		theta = 0
 		Dr = 0
 		Dl = 0
-		
-		self.largura = 0.415
+		self.largura = 0.415-0.08
 		self.raio = 0.195/2
-		self.intervalo = 100.0/1000.0
+		self.intervalo = 10.0/1000.0
 
 	def setAngulos (self, thetaD, thetaE):
 		global thetaDir, thetaEsq
@@ -32,17 +31,23 @@ class localizacao(Thread):
 	def update(self):
 		global thetaDir, thetaEsq, thetaDirAnt, thetaEsqAnt, xpos, ypos, theta, Dr, Dl
 
-		#theta = math.tan(math.sin(thetaDir)/math.cos(thetaDir))
+		thetaDir = round(thetaDir, 3)
+		thetaEsq = round(thetaEsq, 3)
 		
-		thetaDir = (thetaDir+2*math.pi)%(2*math.pi)
-		thetaEsq = (thetaEsq+2*math.pi)%(2*math.pi)
 		
 		#print "TetaD: "+str(thetaDir)+"TetaE: "+str(thetaEsq)
 		
+		thetaDir = (thetaDir+2*math.pi)%(2*math.pi)
+		thetaEsq = (thetaEsq+2*math.pi)%(2*math.pi)
+	
 		dThetaDir = thetaDir - thetaDirAnt
 		dThetaEsq = thetaEsq - thetaEsqAnt
-		print "ThetaDir "+str(thetaDir)+" ThetaDirAnt "+str(thetaDirAnt)
-		
+			
+		if(abs(dThetaDir) > 1):
+			dThetaDir = 0
+		if(abs(dThetaEsq) > 1):
+			dThetaEsq = 0
+			
 		#print "DTetaD: "+str(dThetaDir)+" DTetaE: "+str(dThetaEsq)
 		
 		Dr = dThetaDir*self.raio
@@ -63,7 +68,7 @@ class localizacao(Thread):
 	def run(self):
 		while vrep.simxGetConnectionId(clientID) != -1:
 			self.update()
-			#print "theta = "+str(math.degrees(theta))+" x = "+str(xpos)+" y= "+str(ypos)
+			print "theta = "+str(math.degrees(theta))+" x = "+str(xpos)+" y= "+str(ypos)
 			time.sleep(self.intervalo)
 
 

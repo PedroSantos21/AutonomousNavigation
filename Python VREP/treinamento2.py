@@ -16,45 +16,10 @@ dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
 global v_Left, v_Right, tacoDir, tacoEsq
-v_Left = 0
-v_Right = 0
+v_Left = 0.5
+v_Right = 0.5
 raio = 0.195/2
 
-def listen_keyboard():
-	# Collect events until released
-	with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
-		listener.join()
-
-def on_press(key):
-    try:
-	if key == keyboard.Key.left:
-		velEsq = -0.3
-		velDir = 0.3
-	elif key == keyboard.Key.right:
-		velEsq = 0.3
-		velDir = -0.3
-	elif key == keyboard.Key.esc:
-		# Stop listener
-		sys.exit(0)
-		return False
-	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, velDir, vrep.simx_opmode_streaming)
-	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, velEsq, vrep.simx_opmode_streaming)
-
-	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
-	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-    	localizacao.setAngulos(thetaDir, thetaEsq)
-
-    except AttributeError:
-	print('special key {0} pressed'.format(key))
-
-def on_release(key):
-	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
-	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
-
-	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
-	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-
-	localizacao.setAngulos(thetaDir, thetaEsq)
 	
 if (clientID!=-1):
 	print ("Servidor Conectado!")
@@ -86,7 +51,8 @@ if (clientID!=-1):
 else:
 	print ("Servidor nao conectado!")
 
-	
+
+
 #-----------------Inicializa localizacao------------------
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
@@ -97,12 +63,59 @@ vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opm
 
 thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
 thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-
 localizacao.setAngulos(thetaDir, thetaEsq)
 
 
+
+
+
+#----------------------Thread do teclado---------------------------------------------
+def listen_keyboard():
+	# Collect events until released
+	with keyboard.Listener(on_press=on_press, on_release=on_release) as listener: 
+		listener.join()
+
+def on_press(key):
+    try:
+	if key == keyboard.Key.left:
+		velEsq = -0.2
+		velDir = 0.2
+	elif key == keyboard.Key.right:
+		velEsq = 0.2
+		velDir = -0.2
+	elif key == keyboard.Key.esc:
+		# Stop listener
+		sys.exit(0)
+		return False
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, velDir, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, velEsq, vrep.simx_opmode_streaming)
+
+	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+    	localizacao.setAngulos(thetaDir, thetaEsq)
+
+    except AttributeError:
+	print('special key {0} pressed'.format(key))
+
+def on_release(key):
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
+
+	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+
+	localizacao.setAngulos(thetaDir, thetaEsq)
+
+
+thread.start_new_thread(listen_keyboard,())
+#thread.start_new_thread(get_us,())
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
+	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+
+	localizacao.setAngulos(thetaDir, thetaEsq)
+	
 	for i in range(0,8):
 		returnCode, detectionState, detectedPoint, detectedObjectHandle, detectedSurfaceNormalVector = vrep.simxReadProximitySensor(clientID, sensorHandle[i], vrep.simx_opmode_streaming)
 		if (returnCode == vrep.simx_return_ok):
@@ -110,9 +123,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 				dist.append(detectedPoint[2])
 			else:
 				dist.append(5.0)
-			#print(dist[i])
+			#print("Sensor "+str(i)+" "+str(dist[i]))
 		#else:
 			#print ("Error on sensor "+str(i+1))
-		time.sleep(0.1)
-	
-	thread.start_new_thread(listen_keyboard,())
+		time.sleep(0.01)
