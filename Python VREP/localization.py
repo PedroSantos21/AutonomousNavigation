@@ -60,7 +60,6 @@ class localizacao(Thread):
 		ypos = ypos+Dc*math.sin(theta)
 		theta = theta + (Dr-Dl)/self.largura
 		
-		
 		thetaDirAnt = thetaDir
 		thetaEsqAnt = thetaEsq
 
@@ -68,10 +67,15 @@ class localizacao(Thread):
 	def run(self):
 		while vrep.simxGetConnectionId(clientID) != -1:
 			self.update()
-			print "theta = "+str(math.degrees(theta))+" x = "+str(xpos)+" y= "+str(ypos)
+			#print "theta = "+str(math.degrees(theta))+" x = "+str(xpos)+" y= "+str(ypos)
 			time.sleep(self.intervalo)
 
-
+	def getOrientacao(self):
+		return theta
+		
+	def getPosicao(self):
+		return xpos, ypos
+		
 def iniciar(ID):
 	global clientID
 	clientID = ID
