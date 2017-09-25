@@ -20,7 +20,7 @@ class localizacao(Thread):
 		self.largura = 0.415-0.08
 		self.raio = 0.195/2
 		self.intervalo = 10.0/1000.0
-
+		
 	def setAngulos (self, thetaD, thetaE):
 		global thetaDir, thetaEsq
 		thetaDir = thetaD
@@ -75,6 +75,7 @@ class localizacao(Thread):
 		
 	def getPosicao(self):
 		return xpos, ypos
+
 		
 def iniciar(ID):
 	global clientID

@@ -106,27 +106,42 @@ def on_release(key):
 	localizacao.setAngulos(thetaDir, thetaEsq)
 
 def getThetaAlvo(thetaRobo, xRobo, yRobo):
-	'''
-		Padrao F - xAlvo = 2.5
-			   yAlvo = 5.6
-		
-		Padrao G - xAlvo = 6
-			   yAlvo = -2.3	
-	'''
 	xAlvo = 0
         yAlvo = 0
-	if padrao == 'F':
+        orientacao = None
+        
+        if padrao == 'B':
+		xAlvo = 7.1
+                yAlvo = 0.0
+        elif padrao == 'C':
+		xAlvo = 7.6
+                yAlvo = 0.78
+	elif padrao == 'D':
+        	xAlvo = 0.74
+		yAlvo = 3.5
+        elif padrao == 'E':
+		xAlvo = 0.8
+		yAlvo = -3.6	        
+	elif padrao == 'F':
 		xAlvo = 2.5
 		yAlvo = 5.6	
 	elif padrao == 'G':
-		xAlvo = 6
+		xAlvo = 6.0
                 yAlvo = -2.3	
-		
-	thetaAlvo = thetaRobo - math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
+	  
+	if(xAlvo > xRobo):
+		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
+	else:
+		if(yAlvo > yRobo):
+			thetaAlvo = -thetaRobo + math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))		
+		else:
+			thetaAlvo = -thetaRobo - math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))				
 	
-	if (abs(xRobo - xAlvo) < 0.5) and (abs(yRobo - yAlvo) < 0.5):
-		thetaAlvo = 0
-		
+	#thetaAlvo = math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
+	
+	
+	#if (abs(xRobo - xAlvo) < 0.5) and (abs(yRobo - yAlvo) < 0.5):
+	#	thetaAlvo = 0
 	return thetaAlvo
 	
 
