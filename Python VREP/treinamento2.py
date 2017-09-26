@@ -53,7 +53,7 @@ else:
 
 global padrao
 padrao = raw_input('Qual Padrao de ambiente sera treinado? ')
-numTreinamento = raw_input('Qual o numero do treinamento? ')
+#numTreinamento = raw_input('Qual o numero do treinamento? ')
 
 #-----------------Inicializa localizacao------------------
 localizacao = localization.localizacao()
@@ -82,10 +82,14 @@ def on_press(key):
 	elif key == keyboard.Key.right:
 		velEsq = 0.5
 		velDir = -0.5
+	elif key == keyboard.Key.space:
+		velEsq = 0
+		velDir = 0
 	elif key == keyboard.Key.esc:
 		# Stop listener
 		sys.exit(0)
 		return False
+	
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, velDir, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, velEsq, vrep.simx_opmode_streaming)
 
@@ -110,7 +114,10 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
         yAlvo = 0
         orientacao = None
         
-        if padrao == 'B':
+        if padrao == 'A':
+		xAlvo = 7.3
+                yAlvo = 0.8        
+        elif padrao == 'B':
 		xAlvo = 7.1
                 yAlvo = 0.0
         elif padrao == 'C':
@@ -128,6 +135,12 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	elif padrao == 'G':
 		xAlvo = 6.0
                 yAlvo = -2.3	
+	elif padrao == 'H':
+		xAlvo = 3.58
+                yAlvo = 0.2
+        elif padrao == 'I':
+		xAlvo = 7.85
+                yAlvo = 1.79
 	  
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
@@ -168,26 +181,45 @@ while vrep.simxGetConnectionId(clientID) != -1:
 	xRobo, yRobo = localizacao.getPosicao()
 
 	if(len(dist)==8):
-		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(getThetaAlvo(thetaRobo, xRobo, yRobo))
-		saida = str(thetaRobo-thetaRoboAnt)
+		#for da PARAMETRIZACAO
+		for n in range(len(dist)):
+			dist[n] = dist[n]/5.0
+		
+		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
+		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/2*math.pi)
+		
+		saida = str((thetaRobo-thetaRoboAnt)/(2*math.pi))
 			   
 		nome_diretorio = 'Padrao'+padrao
-		nome_arquivo = 'Treinamento'+str(numTreinamento)+'.txt'			
+		nome_arquivo_entrada = 'Entrada'+padrao+'.txt'
+		nome_arquivo_saida = 'Saida'+padrao+'.txt'						
+		
 		#verifica se ja existe o diretorio
 		if os.path.isdir(nome_diretorio): 
-				#grava dados no txt 
-				if os.path.isfile(nome_diretorio+'/'+nome_arquivo):
-					arquivo = open(nome_diretorio+'/'+nome_arquivo, 'a+')		
-					arquivo.write(entradas+", "+saida+'\n')
+				#grava entradas no txt 
+				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_entrada):
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'a+')		
+					arquivo.write(entradas+'\n')
 					arquivo.close()
 				else:
-					arquivo = open(nome_diretorio+'/'+nome_arquivo, 'w+')		
-					arquivo.write(entradas+", "+saida+'\n')
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'w+')		
+					arquivo.write(entradas+'\n')
+					arquivo.close()
+					
+					
+				#grava saidas no txt 
+				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_saida):
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'a+')		
+					arquivo.write(saida+'\n')
+					arquivo.close()
+				else:
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'w+')		
+					arquivo.write(saida+'\n')
 					arquivo.close()
 		else:
 			os.mkdir(nome_diretorio)
 		print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
-		print "ThetaAlvo: "+str(math.degrees(getThetaAlvo(thetaRobo, xRobo, yRobo)))
+		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 		thetaRoboAnt = thetaRobo
 	dist=[]
 	
