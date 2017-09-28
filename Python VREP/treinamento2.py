@@ -179,7 +179,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 	
 	thetaRobo = localizacao.getOrientacao()
 	xRobo, yRobo = localizacao.getPosicao()
-
+	
+	#Lê sensores
 	if(len(dist)==8):
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):

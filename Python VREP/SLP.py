@@ -20,7 +20,7 @@ output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt', delimiter=',')
 
 model = Sequential()
 
-model.add(Dense(1, activation='sigmoid', input_dim=9, use_bias=True, bias_initializer='zeros'))
+model.add(Dense(1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
 # model.add(Dropout(0.15))
 
 sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
