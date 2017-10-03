@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import vrep
 import time
 import localization
@@ -51,9 +52,10 @@ if (clientID!=-1):
 else:
 	print ("Servidor nao conectado!")
 
-global padrao
+global padrao, virando
 padrao = raw_input('Qual Padrao de ambiente sera treinado? ')
 #numTreinamento = raw_input('Qual o numero do treinamento? ')
+virando = False
 
 #-----------------Inicializa localizacao------------------
 localizacao = localization.localizacao()
@@ -75,7 +77,9 @@ def listen_keyboard():
 		listener.join()
 
 def on_press(key):
-    try:
+	global virando
+	virando = True
+	#try:
 	if key == keyboard.Key.left:
 		velEsq = -0.5
 		velDir = 0.5
@@ -89,18 +93,21 @@ def on_press(key):
 		# Stop listener
 		sys.exit(0)
 		return False
-	
+	else:
+		velEsq = 0
+		velDir = 0
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, velDir, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, velEsq, vrep.simx_opmode_streaming)
 
 	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
 	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-    	localizacao.setAngulos(thetaDir, thetaEsq)
+	localizacao.setAngulos(thetaDir, thetaEsq)
 
-    except AttributeError:
-	print('special key {0} pressed'.format(key))
+
 
 def on_release(key):
+	global virando
+	virando = False
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
@@ -112,6 +119,7 @@ def on_release(key):
 def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
         yAlvo = 0
+        tolerancia = 0.3
         orientacao = None
         
         if padrao == 'A':
@@ -153,13 +161,15 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	#thetaAlvo = math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	
 	
-	#if (abs(xRobo - xAlvo) < 0.5) and (abs(yRobo - yAlvo) < 0.5):
-	#	thetaAlvo = 0
+	if (abs(xRobo - xAlvo) < tolerancia) and (abs(yRobo - yAlvo) < tolerancia):
+		thetaAlvo = 0
 	return thetaAlvo
 	
 
 thread.start_new_thread(listen_keyboard,())
 thetaRoboAnt = 0
+lista_entradas = []
+lista_saidas = []
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
 	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
@@ -167,6 +177,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 	localizacao.setAngulos(thetaDir, thetaEsq)
 	
+	#----------------------------lê os sensores---------------------------------
 	for i in range(0,8):
 		returnCode, detectionState, detectedPoint, detectedObjectHandle, detectedSurfaceNormalVector = vrep.simxReadProximitySensor(clientID, sensorHandle[i], vrep.simx_opmode_streaming)
 		if (returnCode == vrep.simx_return_ok):
@@ -180,8 +191,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 	thetaRobo = localizacao.getOrientacao()
 	xRobo, yRobo = localizacao.getPosicao()
 	
-	#Lê sensores
-	if(len(dist)==8):
+	if(len(dist)==8 and not virando):
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
@@ -190,37 +200,48 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/2*math.pi)
 		
 		saida = str((thetaRobo-thetaRoboAnt)/(2*math.pi))
-			   
-		nome_diretorio = 'Padrao'+padrao
-		nome_arquivo_entrada = 'Entrada'+padrao+'.txt'
-		nome_arquivo_saida = 'Saida'+padrao+'.txt'						
 		
-		#verifica se ja existe o diretorio
-		if os.path.isdir(nome_diretorio): 
-				#grava entradas no txt 
-				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_entrada):
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'a+')		
-					arquivo.write(entradas+'\n')
-					arquivo.close()
-				else:
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'w+')		
-					arquivo.write(entradas+'\n')
-					arquivo.close()
-					
-					
-				#grava saidas no txt 
-				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_saida):
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'a+')		
-					arquivo.write(saida+'\n')
-					arquivo.close()
-				else:
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'w+')		
-					arquivo.write(saida+'\n')
-					arquivo.close()
-		else:
-			os.mkdir(nome_diretorio)
+		lista_entradas.append(entradas)
+		lista_saidas.append(saida)
+		
 		print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
 		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 		thetaRoboAnt = thetaRobo
 	dist=[]
 	
+resp = raw_input("Deseja salvar o treinamento? (S para sim) ")
+
+if(resp == 'S' or resp == 's' or resp == 'sim' or resp == 'Sim'):
+	nome_diretorio = 'Padrao'+padrao
+	nome_arquivo_entrada = 'Entrada'+padrao+'.txt'
+	nome_arquivo_saida = 'Saida'+padrao+'.txt'						
+	
+	for i in range(len(lista_entradas)):
+		#verifica se ja existe o diretorio
+		if os.path.isdir(nome_diretorio): 
+				#grava entradas no txt 
+				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_entrada):
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'a+')		
+					arquivo.write(lista_entradas[i]+'\n')
+					arquivo.close()
+				else:
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'w+')		
+					arquivo.write(lista_entradas[i]+'\n')
+					arquivo.close()
+			
+			
+				#grava saidas no txt 
+				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_saida):
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'a+')		
+					arquivo.write(lista_saidas[i]+'\n')
+					arquivo.close()
+				else:
+					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'w+')		
+					arquivo.write(lista_saidas[i]+'\n')
+					arquivo.close()
+		else:
+			os.mkdir(nome_diretorio)	
+			
+	print "Treinamento salvo com sucesso!"
+else:
+	print "Treinamento descartado!"
