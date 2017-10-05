@@ -91,7 +91,7 @@ def virar(angulo):
 def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
         yAlvo = 0
-        orientacao = None
+        tolerancia = 0.3       
         
         if padrao == 'A':
 		xAlvo = 7.3
@@ -132,8 +132,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	#thetaAlvo = math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	
 	
-	#if (abs(xRobo - xAlvo) < 0.5) and (abs(yRobo - yAlvo) < 0.5):
-	#	thetaAlvo = 0
+	if (abs(xRobo - xAlvo) < tolerancia) and (abs(yRobo - yAlvo) < tolerancia):
+		thetaAlvo = 0
 	return thetaAlvo
 
 

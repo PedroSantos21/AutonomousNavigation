@@ -120,7 +120,6 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
         yAlvo = 0
         tolerancia = 0.3
-        orientacao = None
         
         if padrao == 'A':
 		xAlvo = 7.3
@@ -209,39 +208,35 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		thetaRoboAnt = thetaRobo
 	dist=[]
 	
-resp = raw_input("Deseja salvar o treinamento? (S para sim) ")
+raw_input("Aperte ENTER para salvar o treinamento ou CTRL+C para Cancelar")
+nome_diretorio = 'Padrao'+padrao
+nome_arquivo_entrada = 'Entrada'+padrao+'.txt'
+nome_arquivo_saida = 'Saida'+padrao+'.txt'						
 
-if(resp == 'S' or resp == 's' or resp == 'sim' or resp == 'Sim'):
-	nome_diretorio = 'Padrao'+padrao
-	nome_arquivo_entrada = 'Entrada'+padrao+'.txt'
-	nome_arquivo_saida = 'Saida'+padrao+'.txt'						
-	
-	for i in range(len(lista_entradas)):
-		#verifica se ja existe o diretorio
-		if os.path.isdir(nome_diretorio): 
-				#grava entradas no txt 
-				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_entrada):
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'a+')		
-					arquivo.write(lista_entradas[i]+'\n')
-					arquivo.close()
-				else:
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'w+')		
-					arquivo.write(lista_entradas[i]+'\n')
-					arquivo.close()
-			
-			
-				#grava saidas no txt 
-				if os.path.isfile(nome_diretorio+'/'+nome_arquivo_saida):
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'a+')		
-					arquivo.write(lista_saidas[i]+'\n')
-					arquivo.close()
-				else:
-					arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'w+')		
-					arquivo.write(lista_saidas[i]+'\n')
-					arquivo.close()
-		else:
-			os.mkdir(nome_diretorio)	
-			
-	print "Treinamento salvo com sucesso!"
-else:
-	print "Treinamento descartado!"
+for i in range(len(lista_entradas)):
+	#verifica se ja existe o diretorio
+	if os.path.isdir(nome_diretorio): 
+			#grava entradas no txt 
+			if os.path.isfile(nome_diretorio+'/'+nome_arquivo_entrada):
+				arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'a+')		
+				arquivo.write(lista_entradas[i]+'\n')
+				arquivo.close()
+			else:
+				arquivo = open(nome_diretorio+'/'+nome_arquivo_entrada, 'w+')		
+				arquivo.write(lista_entradas[i]+'\n')
+				arquivo.close()
+		
+		
+			#grava saidas no txt 
+			if os.path.isfile(nome_diretorio+'/'+nome_arquivo_saida):
+				arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'a+')		
+				arquivo.write(lista_saidas[i]+'\n')
+				arquivo.close()
+			else:
+				arquivo = open(nome_diretorio+'/'+nome_arquivo_saida, 'w+')		
+				arquivo.write(lista_saidas[i]+'\n')
+				arquivo.close()
+	else:
+		os.mkdir(nome_diretorio)	
+		
+print "Treinamento salvo com sucesso!"
