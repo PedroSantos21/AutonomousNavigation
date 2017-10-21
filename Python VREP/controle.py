@@ -92,32 +92,32 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
         yAlvo = 0
         tolerancia = 0.5
-        
+
         if padrao == 'A':
         	# ------------- Posicao1 --------------
 		#xAlvo = 7.3
-        	#yAlvo = 0.8        
-                
+        	#yAlvo = 0.8
+
                 # ------------- Posicao2 --------------
                 #xAlvo = 5.4
-                #yAlvo = -0.5  
-                
+                #yAlvo = -0.5
+
                 # ------------- Posicao3 --------------
-                xAlvo = 6.8
-                yAlvo = 2.5
-                
+                #xAlvo = 6.8
+                #yAlvo = 2.5
+
                 # ------------- Posicao4 --------------
                 #xAlvo = 2.8
                 #yAlvo = 2.2
-                
+
                 # ------------- Posicao5 --------------
                 #xAlvo = 7.2
                 #yAlvo = -1.6
-                
+
                 # ------------- Posicao6 --------------
-                #xAlvo = 2.0
-                #yAlvo = -2.3
-                
+                xAlvo = 2.0
+                yAlvo = -2.3
+
         elif padrao == 'B':
 		xAlvo = 7.1
                 yAlvo = 0.0
@@ -129,31 +129,31 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 		yAlvo = 3.5
         elif padrao == 'E':
 		xAlvo = 0.8
-		yAlvo = -3.6	        
+		yAlvo = -3.6
 	elif padrao == 'F':
 		xAlvo = 2.5
-		yAlvo = 5.6	
+		yAlvo = 5.6
 	elif padrao == 'G':
 		xAlvo = 6.0
-                yAlvo = -2.3	
+                yAlvo = -2.3
 	elif padrao == 'H':
 		xAlvo = 3.58
                 yAlvo = 0.2
         elif padrao == 'I':
 		xAlvo = 7.85
                 yAlvo = 1.79
-	  
+
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	else:
 		if(yAlvo > yRobo):
-			thetaAlvo = -thetaRobo + math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))		
+			thetaAlvo = -thetaRobo + math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 		else:
-			thetaAlvo = -thetaRobo - math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))				
-	
+			thetaAlvo = -thetaRobo - math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
+
 	#thetaAlvo = math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
-	
-	
+
+
 	if (abs(xRobo - xAlvo) < tolerancia) and (abs(yRobo - yAlvo) < tolerancia):
 		thetaAlvo = 0
 	return thetaAlvo
@@ -162,14 +162,12 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
 	#seta velocidade nos motores
-	v_Left = 1
-	v_Right = 1
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
 	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
 	thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
-	
+
 	localizacao.setAngulos(thetaDir, thetaEsq)
 
 	#Lê sensores
@@ -182,24 +180,30 @@ while vrep.simxGetConnectionId(clientID) != -1:
 				dist.append(5.0)
 		#print math.degrees(thetaRobo-getThetaAlvo(thetaRobo, xRobo, yRobo))
 		time.sleep(0.01)
-	
+
 	thetaRobo = localizacao.getOrientacao()
 	xRobo, yRobo = localizacao.getPosicao()
-	
+
 	if(len(dist)==8):
 		entradas = []
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
 			entradas.append(dist[n])
-		
+
 		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 		print math.degrees(thetaAlvo)
+		if(thetaAlvo == 0.0):
+			v_Left = 0.0
+			v_Right = 0.0
+		else:
+			v_Left = 1
+			v_Right = 1
 		entradas.append(thetaAlvo/(2*math.pi))
-		
+
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
 		#print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
-		
+
 		output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
 		virar(output*math.pi*2)
 		#print math.degrees(output*2*math.pi)
