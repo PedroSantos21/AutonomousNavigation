@@ -63,7 +63,7 @@ padrao = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
 
 def virar(angulo):
 	thetaInicial = localizacao.getOrientacao()
-	print thetaInicial
+	#print thetaInicial
 	if(angulo > 0):
 		#motorDir.rotate((int) (ang * (DISTANCIA_RODAS / RAIO_RODA)));
 		v_Left = -0.5
@@ -91,11 +91,33 @@ def virar(angulo):
 def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
         yAlvo = 0
-        tolerancia = 0.3       
+        tolerancia = 0.5
         
         if padrao == 'A':
-		xAlvo = 7.3
-                yAlvo = 0.8        
+        	# ------------- Posicao1 --------------
+		#xAlvo = 7.3
+        	#yAlvo = 0.8        
+                
+                # ------------- Posicao2 --------------
+                #xAlvo = 5.4
+                #yAlvo = -0.5  
+                
+                # ------------- Posicao3 --------------
+                xAlvo = 6.8
+                yAlvo = 2.5
+                
+                # ------------- Posicao4 --------------
+                #xAlvo = 2.8
+                #yAlvo = 2.2
+                
+                # ------------- Posicao5 --------------
+                #xAlvo = 7.2
+                #yAlvo = -1.6
+                
+                # ------------- Posicao6 --------------
+                #xAlvo = 2.0
+                #yAlvo = -2.3
+                
         elif padrao == 'B':
 		xAlvo = 7.1
                 yAlvo = 0.0
@@ -172,6 +194,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			entradas.append(dist[n])
 		
 		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
+		print math.degrees(thetaAlvo)
 		entradas.append(thetaAlvo/(2*math.pi))
 		
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
@@ -179,5 +202,5 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		
 		output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
 		virar(output*math.pi*2)
-		print math.degrees(output*2*math.pi)
+		#print math.degrees(output*2*math.pi)
 	dist=[]

@@ -36,7 +36,7 @@ model.fit(input_treinamento, output_treinamento, epochs=120, batch_size=1, verbo
 
 #score = model.evaluate(x_test, y_test, batch_size=1)
 
-model.save('Redes/SLP_A.h5')
+model.save('Redes/MLP_A.h5')
 
 #prediction = model.predict(x_test, batch_size=1)
 # print(prediction)

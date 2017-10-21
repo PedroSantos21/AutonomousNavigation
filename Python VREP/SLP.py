@@ -12,8 +12,8 @@ import numpy as np
 # y_test = keras.utils.to_categorical(np.random.randint(10, size=(100, 1)), num_classes=10)
 
 
-input_treinamento = np.genfromtxt('PadraoA/EntradaA.txt', delimiter=',')
-output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt', delimiter=',')
+input_treinamento = np.genfromtxt('PadraoB/EntradaB.txt', delimiter=',')
+output_treinamento= np.genfromtxt('PadraoB/SaidaB.txt', delimiter=',')
 
 #input_teste = np.genfromtxt('testingsetx', delimiter=',')
 #y_test = np.genfromtxt('testingsety', delimiter=';')
@@ -32,7 +32,7 @@ model.fit(input_treinamento, output_treinamento, epochs=120, batch_size=1, verbo
 
 #score = model.evaluate(x_test, y_test, batch_size=1)
 
-model.save('Redes/SLP_A.h5')
+model.save('Redes/SLP_B.h5')
 
 #prediction = model.predict(x_test, batch_size=1)
 # print(prediction)
