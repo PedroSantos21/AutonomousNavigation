@@ -2,9 +2,54 @@ import random
 from scipy.stats import norm
 import numpy
 #PARÂMETROS DO EP --> EP diferencia-se de AG pelo uso somente de mutação
+class cromossomo():
+    #Funçao de Custo
+    self.custoTotal = 0
+    self.custoS = 0
+    self.custoP = 0
+    self.Q1 = 1
+    self.Q2 = 1
+    self.Q3 = 1
+    self.Q4 = 1
+    self.alpha = 1
+    self.beta = 1
+    self.fitness = 0.0
 
-input_target = None
-input_target_length = None
+    self.Col = 0
+    self.Osc = 0
+    self.Lng = 0
+    self.Arr = 0
+    self.Clr = 0 #valores devem vir após teste da solução na simulação
+
+    def __init__ (self, pesosIniciais):
+        self.pesos = pesosIniciais
+        self.cromossomo_size = 18
+
+        for j in range(self.cromossomo_size):
+            if(j < self.cromossomo_size/2):
+                self.cromossomo.append(1)
+            else:
+                for peso in pesos:
+                    self.cromossomo.append(peso)
+
+
+    def setFitness(self):
+        self.verificaCusto_S(cromossomo)
+        self.verificaCusto_P(self.Col, self.Osc, self.Lng, self.Arr, self.Clr)
+        self.fitness = (self.alfa*self.custoS) + (self.beta*self.custoP)
+
+    def getFitness(self):
+        return self.fitness
+
+    def verificaCusto_P(self):
+        self.custoP = 0
+        self.custoP = self.custoP + (self.Q1*(self.Col*10000) + self.Q2*(self.Osc*0.1) + self.Q3*self.Lng + self.Q4*(self.Arr*100) + self.Q5*(1 - self.Clr))
+
+    def verificaCusto_S(cromossomo):
+        self.custoS = 0
+        for i in range(self.cromossomo_size):
+            if(i < 9):
+                self.custoS = self.custoS + cromossomo[i]
 
 class EP:
     def __init__(self, pesosIniciais):
@@ -18,21 +63,12 @@ class EP:
         self.tournament_size = 15
         self.fitness = []
 
-        #Funçao de Custo
-        self.custoTotal = 0
-        self.custoS = 0
-        self.custoP = 0
-        self.Q1 = 1
-        self.Q2 = 1
-        self.Q3 = 1
-        self.Q4 = 1
-        self.alpha = 1
-        self.beta = 1
+
 
         iniciaPopulacao(self.population_size, pesosIniciais)
         #envia pesos pra rede e recebe os valores para calcular o fitness de todos os
         # Col, Osc, Lng, Arr, Clr =
-        calculaFitness(self.population, Col, Osc, Lng, Arr, Clr)
+        evaluation(self.population)
 
         for generation in range(generations):
             print "Generation: "+str(generation)
@@ -51,33 +87,19 @@ class EP:
             populacao = selection(populacao)
 
 
-
     def iniciaPopulacao(self, population_size, pesos):
         for i  in range(population_size):
-            for j in range(self.cromossomo_size):
-                if(j < self.cromossomo_size/2):
-                    self.cromossomo.append(1)
-                else:
-                    for peso in pesos:
-                        self.cromossomo.append(peso)
-            self.population.append(self.cromossomo)
-            self.cromossomo = []
+            self.population.append(cromossomo(pesos))
 
-    def calculaFitness(self, Col, Osc, Lng, Arr, Clr):
+
+    def evaluation(self, Col, Osc, Lng, Arr, Clr):
         for cromossomo in self.population:
-            self.verificaCusto_S(cromossomo)
-            self.verificaCusto_P(Col, Osc, Lng, Arr, Clr)
-            self.fitness.append((self.alfa*self.custoS) + (self.beta*self.custoP))
+            getFitness(cromossomo)
 
-    def verificaCusto_P(Col, Osc, Lng, Arr, Clr):
-        self.custoP = 0
-        self.custoP = self.custoP + (self.Q1*(Col*10000) + self.Q2*(Osc*0.1) + self.Q3*Lng + self.Q4*(Arr*100) + self.Q5*(1 - Clr))
 
-    def verificaCusto_S(cromossomo):
-        self.custoS = 0
-        for i in range(cromossomo):
-            if(i < 9):
-                self.custoS = self.custoS + cromossomo[i]
+            self.fitness.append()
+
+
 
     def selection(self):
         elite = []
