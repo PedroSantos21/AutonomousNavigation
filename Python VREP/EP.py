@@ -43,8 +43,7 @@ class cromossomo():
         self.Osc = Osc
         self.Lng = Lng
         self.Arr = Arr
-        self.Clr = Clr #ok? VIADUMMMM
-
+        self.Clr = Clr
 
 
 class EP:
@@ -56,10 +55,15 @@ class EP:
         self.mutation_rate = 0.05
         self.tournament_size = 15
 
+        #Self-adaptive mutation_rate
+        self.St = 0.15 #Similarity Threshold
+        self.Ma_min = 1
+        self.Ma_max = 99 #Adaptive mutantion bounds
+        self.delta_Ma = 1    #Adaptive Mutation incremet
+        self.P_adaptive
+
         iniciaPopulacao(self.population_size, pesosIniciais)
-        #envia pesos pra rede e recebe os valores para calcular o fitness de todos os
-        # Col, Osc, Lng, Arr, Clr = aqui? criar setParam ?
-        #dita ae como seria lei
+
         for cromossomo in self.population:
             evaluation(cromossomo)
             #aqui a condição de parada também precisa ser alterada --> ok
@@ -73,7 +77,7 @@ class EP:
 
             for cromossomo in self.population:
                 #mutation
-                mutation(populacao)
+                mutation(self.population)
                 #evaluation então, aqui que tem que fazer a integração com a rede
                 cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
                 evaluation(cromossomo)
@@ -104,14 +108,31 @@ class EP:
 
     def selection(self):
         elite = []
-        #Rank-based -- cada cromossomo aqui são os pesos da rede --> redes com pesos diferentes e mesma topologia são rede diferentes, entende?
+        #Rank-based --
         rank_based = sorted(self.fitness)
         for i in rang(rank_based):
             if (i < 3):
                 elite = rank_based[i]
             else:
-#kkkkk
-ou a mutacao tá foda---> não acho nada e o selection...pearai
 
+    #Self-adaptive mutation
     def mutation(self):
-        for
+
+
+    def similarity(self):
+        similar = 0
+        matched = False
+        length = cromossomo.cromossomo_size
+
+        rank = sorted(self.population) #???
+
+        for i in range(length-1):
+            if (rank[i] == rank[i+1]):
+                similar = similar + 1
+                matched = True
+            elif (matched):
+                similar = similar + 1
+                matched = False
+            if(matched &  (i+1 == length - 1)):
+                similar = simiilar + 1
+        return (similar/length)
