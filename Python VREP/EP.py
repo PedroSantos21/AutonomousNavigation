@@ -55,8 +55,8 @@ class EP:
         self.mutation_rate = 0.05
         self.tournament_size = 15
 
-        #Self-adaptive mutation_rate
-        self.St = 0.15 #Similarity Threshold
+        #Self-adaptive mutation #Alterar valores de acordo com nosso problema
+        self.St = 0.15  #Similarity Threshold
         self.Ma_min = 1
         self.Ma_max = 99 #Adaptive mutantion bounds
         self.delta_Ma = 1    #Adaptive Mutation incremet
@@ -117,6 +117,11 @@ class EP:
 
     #Self-adaptive mutation
     def mutation(self):
+        similar = similarity(self.population)
+        if(similar >= self.St):
+            self.P_adaptive = self.P_adaptive + self.delta_Ma
+        else:
+            self.P_adaptive = self.P_adaptive - self.delta_Ma
 
 
     def similarity(self):
@@ -124,7 +129,7 @@ class EP:
         matched = False
         length = cromossomo.cromossomo_size
 
-        rank = sorted(self.population) #???
+        rank = sorted(self.fitness) #???
 
         for i in range(length-1):
             if (rank[i] == rank[i+1]):
