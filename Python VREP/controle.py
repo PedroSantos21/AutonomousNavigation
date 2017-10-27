@@ -245,6 +245,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#print math.degrees(output*2*math.pi)
 
 		if ((time.time() - inicio) > 30) and not atingiu:
+			v_Left = 0.0
+			v_Right = 0.0
 			#print "TIMEOUT"
 			if min(leituras) < 0.05:
 				clearance = 1.0 - min(leituras)/(sum(leituras)/len(leituras))
