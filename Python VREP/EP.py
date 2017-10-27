@@ -123,21 +123,24 @@ class EP:
         else:
             self.P_adaptive = self.P_adaptive - self.delta_Ma
 
-
+    #define o nivel de similaridade da populacao
     def similarity(self):
         similar = 0
         matched = False
-        length = cromossomo.cromossomo_size
+        length = self.population_size
 
-        rank = sorted(self.fitness) #???
+        rank = sorted(self.fitness)
 
         for i in range(length-1):
+
             if (rank[i] == rank[i+1]):
                 similar = similar + 1
                 matched = True
             elif (matched):
                 similar = similar + 1
                 matched = False
+
+            #se esta na ultima posicao
             if(matched &  (i+1 == length - 1)):
-                similar = simiilar + 1
+                similar = similar + 1
         return (similar/length)
