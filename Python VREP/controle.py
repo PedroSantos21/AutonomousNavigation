@@ -58,7 +58,7 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/SLP_B_1.h5')# create the original model
+model =  load_model('Redes/SLP_A_9.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
 layer = slp_model.get_layer(name=None, index=1)
 print layer.get_weights()
@@ -238,8 +238,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 		output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
 		saidas.append(output)
-		if abs(math.degrees(output*2*math.pi)) > 0.3:
-			virar(output*2*math.pi)
+		#if abs(math.degrees(output*2*math.pi)) > 0.3:
+		virar(output*2*math.pi)
 
 		if len(saidas) > 2:
 			if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
