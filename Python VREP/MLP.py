@@ -13,7 +13,7 @@ import numpy as np
 
 
 input_treinamento = np.genfromtxt('PadraoA/EntradaA.txt', delimiter=',')
-output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt', delimiter=',')
+output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt')
 
 #input_teste = np.genfromtxt('testingsetx', delimiter=',')
 #y_test = np.genfromtxt('testingsety', delimiter=';')
@@ -27,7 +27,7 @@ model.add(Dense(5, activation='tanh', use_bias=True, bias_initializer='zeros'))
 model.add(Dense(1, activation='tanh', use_bias=True, bias_initializer='zeros'))
 
 
-sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+sgd = SGD(lr=0.005, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='mean_squared_error',
              optimizer=sgd,
              metrics=['accuracy'])
@@ -36,7 +36,7 @@ model.fit(input_treinamento, output_treinamento, epochs=120, batch_size=1, verbo
 
 #score = model.evaluate(x_test, y_test, batch_size=1)
 
-model.save('Redes/MLP_A.h5')
+model.save('Redes/MLP_A_1.h5')
 
 #prediction = model.predict(x_test, batch_size=1)
 # print(prediction)

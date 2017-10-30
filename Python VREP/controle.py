@@ -58,8 +58,10 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/SLP_A.h5')# create the original model
+model =  load_model('Redes/SLP_B_1.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
+layer = slp_model.get_layer(name=None, index=1)
+print layer.get_weights()
 
 global padrao, posInicial
 padrao = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
@@ -177,8 +179,10 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 leituras = []
 saidas = []
 inicio = time.time()
+clearance = 0
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
+
 	#seta velocidade nos motores
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
@@ -209,9 +213,11 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
 			entradas.append(dist[n])
-			leituras.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True
+
+		if min(dist) < 0.05:
+			clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
 
 		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 		#print math.degrees(thetaAlvo)
@@ -219,11 +225,6 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			v_Left = 0.0
 			v_Right = 0.0
 			atingiu = True
-			if min(leituras) < 0.05:
-				clearance = 1.0 - min(leituras)/(sum(leituras)/len(leituras))
-			else:
-				clearance = 0
-
 			#print "clr: ", clearance
 			#print "oscilacoes: ", oscilacoes
 			#--------------RETORNAR VALORES PRO EP----------------
@@ -233,26 +234,22 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		entradas.append(thetaAlvo/(2*math.pi))
 
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
-		#print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
+		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 
 		output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
 		saidas.append(output)
-		virar(output*math.pi*2)
+		if abs(math.degrees(output*2*math.pi)) > 0.3:
+			virar(output*2*math.pi)
 
 		if len(saidas) > 2:
 			if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
 				oscilacoes = oscilacoes+1
-		#print math.degrees(output*2*math.pi)
+		print "Saida: ", math.degrees(output*2*math.pi)
 
 		if ((time.time() - inicio) > 30) and not atingiu:
-			v_Left = 0.0
-			v_Right = 0.0
-			#print "TIMEOUT"
-			if min(leituras) < 0.05:
-				clearance = 1.0 - min(leituras)/(sum(leituras)/len(leituras))
-			else:
-				clearance = 0
+			#v_Left = 0.0
+			#v_Right = 0.0
+			print "TIMEOUT"
+
 			#--------------RETORNAR VALORES PRO EP----------------
-
-
 	dist=[]

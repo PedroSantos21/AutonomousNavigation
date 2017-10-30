@@ -208,7 +208,7 @@ thetaRoboAnt = 0
 lista_entradas = []
 lista_saidas = []
 leituras = []
-
+clearance = 0
 #---------------------------Loop principal ---------------------------------------
 while vrep.simxGetConnectionId(clientID) != -1:
 	thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
@@ -237,7 +237,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			leituras.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True
-
+		if min(dist) < 0.05:
+			clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
 
 		blending.setLeituras(dist)
 		padrao_blending = blending.definePadrao()
@@ -247,11 +248,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		if thetaAlvo == 0:
 			atingiu = True
 			#print min(leituras)
-			if min(leituras) < 0.05:
-				clearance = 1.0 - min(leituras)/(sum(leituras)/len(leituras))
-			else:
-				clearance = 0
-			#print clearance
+			print clearance
 
 		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/2*math.pi)
 		saida = str((thetaRobo-thetaRoboAnt)/(2*math.pi))

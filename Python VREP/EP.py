@@ -33,7 +33,7 @@ class cromossomo():
 
 
     def setFitness(self, fitness):
-        self.fitness = fitness;
+        self.fitness = fitness
 
     def getFitness(self):
         return self.fitness
@@ -61,7 +61,7 @@ class EP:
         self.Ma_max = 99 #Adaptive mutantion bounds
         self.delta_Ma = 1    #Adaptive Mutation incremet
         self.P_adaptive
-
+        self.next_generation = []
         iniciaPopulacao(self.population_size, pesosIniciais)
 
         for cromossomo in self.population:
@@ -70,6 +70,7 @@ class EP:
         for generation in range(generations):
             print "Generation: "+str(generation)
             #condição de parada
+            #ARRUMAR LEITAO
             for i in range(population_size):
                 if self.fitness[i] <= 80.0:
                     print "Condição de Parada: Fitness"
@@ -91,33 +92,70 @@ class EP:
             self.population.append(cromossomo(pesos))
 
 
-    def evaluation(self, cromossomo): #nova forma?? daqui pra baixo tá minha dúvida, como acha que seria melhor, po
+    def evaluation(self, cromossomo):
         self.verificaCusto_S(cromossomo)
         self.verificaCusto_P(cromossomo)
-        cromossomo.setFitness((self.alfa*self.custoS) + (self.beta*self.custoP))  #certo? então,aí que está esses parametros teriam que já ser atualizados diretamente no cromossomo ok?
+        cromossomo.setFitness((cromossomo.alfa*cromossomo.custoS) + (cromossomo.beta*cromossomo.custoP))
 
-    def verificaCusto_P(cromossomo):
-        cromossomo.custoP = 0
-        cromossomo.custoP = cromossomo.custoP + (cromossomo.Q1*(cromossomo.Col*10000) + cromossomo.Q2*(cromossomo.Osc*0.1) + cromossomo.Q3*cromossomo.Lng + cromossomo.Q4*(cromossomo.Arr*100) + cromossomo.Q5*(1 - cromossomo.Clr))
+    def verificaCusto_P(self, cromossomo):
+        #cromossomo.custoP = 0
+        cromossomo.custoP = (cromossomo.Q1*(cromossomo.Col*10000) + cromossomo.Q2*(cromossomo.Osc*0.1) + cromossomo.Q3*cromossomo.Lng + cromossomo.Q4*(cromossomo.Arr*100) + cromossomo.Q5*cromossomo.Clr)
 
-    def verificaCusto_S(cromossomo):
-        cromossomo.custoS = 0
+    def verificaCusto_S(self, cromossomo):
         for i in range(cromossomo.cromossomo_size):
             if(i < 9):
-                cromossomo.custoS  = cromossomo.custoS + cromossomo[i]
+                cromossomo.custoS  = cromossomo[i]
 
     def selection(self):
-        elite = []
-        #Rank-based --
-        rank_based = sorted(self.fitness)
-        for i in rang(rank_based):
-            if (i < 3):
-                elite = rank_based[i]
-            else:
+        elitism()
+        for i in range(tournament_size):
+            self.tournament_selection()
+
+    def elitism(self):
+        #Rank-based
+        for cromossomo in self.population:
+            fitness_list.append(cromossomo.fitness)
+        rank_based = sorted(fitness_list)
+        for i in range(3):
+            for cromossomo in self.population:
+                if rank_based[i] == cromossomo.fitness:
+                    next_generation.append(cromossomo)
+                    self.population.remove(cromossomo)
+                    break
+
+    def tournament_selection(self):
+        #implements tournament selection
+        #randomly select 2 and have them fight to get into parentPool
+
+        for i in range(self.population_size):
+            #select fighters randomly popSize-1 times (elitism takes one slot)
+            p1index = random.randint(0,self.population_size)
+            p2index = random.randint(0,self.population_size)
+            while(p2index == p1index):
+                p2index = random.randint(0, self.population_size)
+
+            cromossomo1 = self.population[p1index]
+            cromossomo2 = self.population[p2index]
+
+            winner = fight(cromossomo1, cromossomo2)
+            #print 'adding %sth parent'%str(i)
+            self.next_generation.append(winner)
+
+    def fight(self, cromossomo1, cromossomo2):
+        #fights the chromosome passed in as parameter (opponent)
+        fitness1 = cromossomo1.fitness
+        fitness2 = cromossomo2.fitness
+
+        if fitness1 < fitness2:
+            return cromossomo1
+        else:
+            return cromossomo2
+
+
 
     #Self-adaptive mutation
     def mutation(self):
-        similar = similarity(self.population)
+        similar = self.similarity()
         if(similar >= self.St):
             self.P_adaptive = self.P_adaptive + self.delta_Ma
         else:
@@ -125,14 +163,17 @@ class EP:
 
     #define o nivel de similaridade da populacao
     def similarity(self):
+        fitness_list = []
         similar = 0
         matched = False
         length = self.population_size
 
-        rank = sorted(self.fitness)
+        for cromossomo in self.population:
+            fitness_list.append(cromossomo.fitness)
 
-        for i in range(length-1):
+        rank = sorted(fitness_list)
 
+        for i in range(length):
             if (rank[i] == rank[i+1]):
                 similar = similar + 1
                 matched = True
@@ -141,6 +182,6 @@ class EP:
                 matched = False
 
             #se esta na ultima posicao
-            if(matched &  (i+1 == length - 1)):
+            if(matched and (i+1 == length)):
                 similar = similar + 1
         return (similar/length)
