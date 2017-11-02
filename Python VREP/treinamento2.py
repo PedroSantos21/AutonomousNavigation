@@ -18,11 +18,12 @@ dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
 global v_Left, v_Right, tacoDir, tacoEsq, path_lenght, colisao, atingiu, clearance
-v_Left = 1
-v_Right = 1
+v_Left = 0
+v_Right = 0
 raio = 0.195/2
 colisao = False
 atingiu = False
+esperando = False
 clearance = 0
 if (clientID!=-1):
 	print ("Servidor Conectado!")
@@ -54,12 +55,12 @@ if (clientID!=-1):
 else:
 	print ("Servidor nao conectado!")
 
-global padrao, virando, posInicial
+global padrao, virando, posInicial, salvar
 padrao = raw_input('Qual Padrao de ambiente sera treinado? ')
 posInicial = raw_input('Qual a posicao inicial do robo? ')
 #numTreinamento = raw_input('Qual o numero do treinamento? ')
 virando = False
-
+salvar = False
 #-----------------Inicializa localizacao------------------
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
@@ -83,25 +84,31 @@ def listen_keyboard():
 		listener.join()
 
 def on_press(key):
-	global virando
-	virando = True
-	#try:
+	global virando, salvar
 	if key == keyboard.Key.left:
+		virando = True
+		salvar = False
 		velEsq = -0.5
 		velDir = 0.5
 	elif key == keyboard.Key.right:
+		virando = True
+		salvar = False
 		velEsq = 0.5
 		velDir = -0.5
-	elif key == keyboard.Key.space:
-		velEsq = 0
-		velDir = 0
 	elif key == keyboard.Key.esc:
 		# Stop listener
 		sys.exit(0)
 		return False
+	elif key == keyboard.Key.up:
+		virando = False
+		salvar = True
+		velEsq = 1
+		velDir = 1
 	else:
+		virando = False
 		velEsq = 0
 		velDir = 0
+
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, velDir, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, velEsq, vrep.simx_opmode_streaming)
 
@@ -112,8 +119,13 @@ def on_press(key):
 
 
 def on_release(key):
-	global virando
-	virando = False
+	global virando, salvar
+	if virando:
+		salvar = True
+		virando = False
+	else:
+		salvar = False
+
 	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
@@ -229,9 +241,31 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 	thetaRobo = localizacao.getOrientacao()
 	xRobo, yRobo = localizacao.getPosicao()
+	thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 
-	if(len(dist)==8 and not virando):
+	print "x: ", (xRobo), " y: ",(yRobo)," ThetaRobo: ",math.degrees(thetaRobo)
+	print "ThetaAlvo: ", (math.degrees(thetaAlvo))
+	if len(dist)==8:
 		#for da PARAMETRIZACAO
+		while not salvar and vrep.simxGetConnectionId(clientID) != -1:
+			thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+			thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+			localizacao.setAngulos(thetaDir, thetaEsq)
+			thetaRobo = localizacao.getOrientacao()
+			xRobo, yRobo = localizacao.getPosicao()
+			thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
+			esperando = True
+		esperando = False
+
+		thetaDir = vrep.simxGetJointPosition(clientID, rightMotorHandle, vrep.simx_opmode_streaming)[1]
+		thetaEsq = vrep.simxGetJointPosition(clientID, leftMotorHandle, vrep.simx_opmode_streaming)[1]
+		localizacao.setAngulos(thetaDir, thetaEsq)
+		thetaRobo = localizacao.getOrientacao()
+		xRobo, yRobo = localizacao.getPosicao()
+		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
+		print "x: ", (xRobo), " y: ",(yRobo)," ThetaRobo: ",math.degrees(thetaRobo)
+		print "ThetaAlvo: ", (math.degrees(thetaAlvo))
+
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
 			leituras.append(dist[n])
@@ -244,22 +278,21 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		padrao_blending = blending.definePadrao()
 		#print blending.calculaPesos(padrao)
 
-		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 		if thetaAlvo == 0:
 			atingiu = True
+			print "ATINGIU"
 			#print min(leituras)
 			print clearance
 
-		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/2*math.pi)
-		saida = str((thetaRobo-thetaRoboAnt)/(2*math.pi))
+		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/math.pi)
+		saida = str((thetaRobo-thetaRoboAnt)/(math.pi))
 
 		lista_entradas.append(entradas)
 		lista_saidas.append(saida)
 
-		print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
-		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
-
+		print "Saida: ", math.degrees(thetaRobo-thetaRoboAnt)
 		thetaRoboAnt = thetaRobo
+		salvar = False
 	dist=[]
 
 raw_input("Aperte ENTER para salvar o treinamento ou CTRL+C para Cancelar")
