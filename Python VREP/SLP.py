@@ -11,7 +11,7 @@ output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt', delimiter='None')
 learning_rate = 0
 
 
-learning_rate = 0.00005
+learning_rate = 0.005
 print "LR: ", learning_rate
 model = Sequential()
 model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
