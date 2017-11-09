@@ -11,7 +11,7 @@ output_treinamento= np.genfromtxt('PadraoA/SaidaA.txt', delimiter='None')
 learning_rate = 0
 
 
-learning_rate = 0.005
+learning_rate = 0.0001
 print "LR: ", learning_rate
 model = Sequential()
 model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
@@ -20,5 +20,5 @@ model.compile(loss='mean_squared_error',
          optimizer= sgd,
          metrics=['accuracy'])
 
-model.fit(input_treinamento, output_treinamento, epochs=200, batch_size=1, verbose=1)
-model.save('Redes/SLP_A_9.h5')
+model.fit(input_treinamento, output_treinamento, epochs=150, batch_size=1, verbose=1)
+model.save('Redes/SLP_A_11.h5')

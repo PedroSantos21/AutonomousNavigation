@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-predictions = np.genfromtxt('Redes/Predictions_SLP_A_9')
+predictions = np.genfromtxt('Redes/Predictions_SLP_A_10')
 saidas = np.genfromtxt('PadraoA/SaidaA.txt')
 
 print 'plotando...'
