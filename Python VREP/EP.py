@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 import random
 from scipy.stats import norm
 import numpy
+import EP2SLP
 #PARÂMETROS DO EP --> EP diferencia-se de AG pelo uso somente de mutação
 class cromossomo():
     def __init__ (self, pesosIniciais):
@@ -14,23 +16,30 @@ class cromossomo():
         self.Q4 = 1
         self.alpha = 1
         self.beta = 1
-        self.fitness = 0.0
+        self.fitness = 0
 
         self.Col = 0
         self.Osc = 0
         self.Lng = 0
         self.Arr = 0
         self.Clr = 0 #valores devem vir após teste da solução na simulação
-        self.pesos = pesosIniciais
+        self.pesos = list(pesosIniciais)
         self.cromossomo_size = 18
+        self.genes = []
 
         for j in range(self.cromossomo_size):
             if(j < self.cromossomo_size/2):
-                self.cromossomo.append(1)
+                self.genes.append(1)
             else:
                 for peso in pesos:
-                    self.cromossomo.append(peso)
+                    self.genes.append(peso)
 
+
+    def setGenes(self, posicao, valor):
+        self.genes[posicao] = valor
+
+    def getGenes(self):
+        return self.genes
 
     def setFitness(self, fitness):
         self.fitness = fitness
@@ -52,7 +61,7 @@ class EP:
         self.population_size = 30
         self.generations = 200
         self.elite_size = 3
-        self.mutation_rate = 0.05
+        self.mutation_rate = 2   #Quantidade de genes a serem mutados
         self.tournament_size = 15
 
         #Self-adaptive mutation #Alterar valores de acordo com nosso problema
@@ -62,34 +71,43 @@ class EP:
         self.delta_Ma = 1    #Adaptive Mutation incremet
         self.P_adaptive
         self.next_generation = []
+
+        self.intensidadeMutacao = 0.1
+
+        global ambiente, posicaoInicial
+        ambiente = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
+        posicaoInicial = raw_input('Qual a posicao inicial do robo? ')
+
         iniciaPopulacao(self.population_size, pesosIniciais)
 
-
-
         for cromossomo in self.population:
-            #RODA O CODIGO DE CONTROLE E PEGA OS PARAMETROS DO CROMOSSOMO
+            Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial, cromossomo.getGenes())
             cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
             evaluation(cromossomo)
 
         for generation in range(generations):
+            self.next_generation = []
             print "Generation: "+str(generation)
             #condição de parada
 
-            for i in range(population_size):
-                if self.fitness[i] <= 80.0:
+            for cromossomo in self.population:
+                if cromossomo.getFitness() <= 80.0:
                     print "Condição de Parada: Fitness"
                     break
 
             for cromossomo in self.population:
-                #mutation
-                mutation(self.population)
-                #evaluation então, aqui que tem que fazer a integração com a rede
+                mutation(cromossomo)    #mutation
+                Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial,cromossomo.getGenes())
                 cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
-                evaluation(cromossomo)
+                evaluation(cromossomo)            #evaluation então, aqui que tem que fazer a integração com a rede
 
-            #selection
             selection(self.population)
 
+            for cromossomo in self.population:      #restante dos elementos são mutados para serem levados a proxima geração
+                mutation(cromossomo)
+                self.next_generation.append(cromossomo)
+
+            self.population = list(self.next_generation)
 
     def iniciaPopulacao(self, population_size, pesos):
         for i  in range(population_size):
@@ -123,7 +141,7 @@ class EP:
         for i in range(3):
             for cromossomo in self.population:
                 if rank_based[i] == cromossomo.fitness:
-                    next_generation.append(cromossomo)
+                    self.next_generation.append(cromossomo)
                     self.population.remove(cromossomo)
                     break
 
@@ -144,6 +162,7 @@ class EP:
             winner = fight(cromossomo1, cromossomo2)
             #print 'adding %sth parent'%str(i)
             self.next_generation.append(winner)
+            self.population.remove(winner)
 
     def fight(self, cromossomo1, cromossomo2):
         #fights the chromosome passed in as parameter (opponent)
@@ -156,7 +175,8 @@ class EP:
             return cromossomo2
 
     #Self-adaptive mutation
-    def mutation(self):
+    def mutation(self, cromossomo):
+        genesMutados = []
         similar = self.similarity()
         if(similar >= self.St):
             self.P_adaptive = self.P_adaptive + self.delta_Ma
@@ -164,7 +184,21 @@ class EP:
             self.P_adaptive = self.P_adaptive - self.delta_Ma
         probability = random.randint(0, 100)
 
-        if probability <= self.P_adaptive*100:
+        if(probability <= self.P_adaptive*100):
+            for i in range(self.mutation_rate):
+                gene = random.randint(9, 18)
+
+                while(gene in genesMutados):
+                   gene = random.randint(9, 18)
+
+                incremento = cromossomo.getGenes()[gene]*self.intensidadeMutacao
+                fatorAditivo = random.randint(1, 3)  #fator para definir se será decremento ou incremento
+                if(fatorAditivo == 1):   #soma
+                    cromossomo.setGenes(gene, (incremento+cromossomo.getGenes()[gene]))
+                else:
+                    cromossomo.setGenes(gene, (-incremento+cromossomo.getGenes()[gene]))
+
+                genesMutados.append(gene)
 
 
 
@@ -192,3 +226,7 @@ class EP:
             if(matched and (i+1 == length)):
                 similar = similar + 1
         return (similar/length)
+
+EP2SLP.init()
+pesosIniciais = EP2SLP.getPesosIniciais('D')
+ep = EP(pesosIniciais)
