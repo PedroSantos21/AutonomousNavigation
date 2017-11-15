@@ -6,8 +6,8 @@ import keras.backend as K
 import numpy as np
 
 
-input_treinamento = np.genfromtxt('PadraoB/EntradaB.txt', delimiter=',')
-output_treinamento= np.genfromtxt('PadraoB/SaidaB.txt', delimiter='None')
+input_treinamento = np.genfromtxt('PadraoC/EntradaC.txt', delimiter=',')
+output_treinamento= np.genfromtxt('PadraoC/SaidaC.txt', delimiter='None')
 
 model = Sequential()
 
@@ -19,4 +19,4 @@ model.compile(loss='mean_squared_error',
 
 model.fit(input_treinamento, output_treinamento, epochs=150, batch_size=1, verbose=1)
 
-model.save('Redes/SLP_B_2.h5')
+model.save('Redes/SLP_C.h5')

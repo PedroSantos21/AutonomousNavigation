@@ -64,13 +64,17 @@ class EP:
         self.next_generation = []
         iniciaPopulacao(self.population_size, pesosIniciais)
 
+
+
         for cromossomo in self.population:
+            #RODA O CODIGO DE CONTROLE E PEGA OS PARAMETROS DO CROMOSSOMO
+            cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
             evaluation(cromossomo)
-            #aqui a condição de parada também precisa ser alterada --> ok
+
         for generation in range(generations):
             print "Generation: "+str(generation)
             #condição de parada
-            #ARRUMAR LEITAO
+
             for i in range(population_size):
                 if self.fitness[i] <= 80.0:
                     print "Condição de Parada: Fitness"
@@ -151,8 +155,6 @@ class EP:
         else:
             return cromossomo2
 
-
-
     #Self-adaptive mutation
     def mutation(self):
         similar = self.similarity()
@@ -160,6 +162,11 @@ class EP:
             self.P_adaptive = self.P_adaptive + self.delta_Ma
         else:
             self.P_adaptive = self.P_adaptive - self.delta_Ma
+        probability = random.randint(0, 100)
+
+        if probability <= self.P_adaptive*100:
+
+
 
     #define o nivel de similaridade da populacao
     def similarity(self):
