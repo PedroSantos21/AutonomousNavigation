@@ -31,10 +31,8 @@ class cromossomo():
         for j in range(self.cromossomo_size):
             if(j < self.cromossomo_size/2):
                 self.genes.append(1)
-            else:
-                for peso in pesos:
-                    self.genes.append(peso)
-
+        for peso in pesos:
+            self.genes.append(peso)
 
     def setGenes(self, posicao, valor):
         self.genes[posicao] = valor
@@ -114,14 +112,18 @@ class EP:
                 self.next_generation.append(cromossomo)
 
             print "---------NEXT GENERATION---------"
-            print self.next_generation
-
+            #print self.next_generation
+            for cromossomo in self.next_generation:
+                print cromossomo.getGenes()
             self.population = list(self.next_generation)
 
     def iniciaPopulacao(self, population_size, pesos):
         for i  in range(population_size):
             self.population.append(cromossomo(pesos))
         print "----------POPULACAO INICIAL-------------"
+
+        #for individuo in self.population:
+        #    print individuo.getGenes()
 
     def evaluation(self, cromossomo):
         self.verificaCusto_S(cromossomo)
@@ -251,5 +253,5 @@ pesosIniciais = EP2SLP.getPesosIniciais('D')
 pesos = []
 for valor in pesosIniciais[0]:
     pesos.append(valor[0])
-print pesos
+#print pesos
 ep = EP(pesos)
