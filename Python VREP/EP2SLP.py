@@ -8,28 +8,24 @@ import numpy as np
 from keras.models import Model
 from keras.models import load_model
 
-serverIP = "127.0.0.1"
-serverPort = 19999
-#---------------------Conecta no servidor---------------------------------
-clientID = vrep.simxStart(serverIP, serverPort, True, True, 2000, 5)
-nomeSensor = []
-sensorHandle = []
-dist = []
-leftMotorHandle = 0
-rightMotorHandle = 0
-global v_Left, v_Right, tacoDir, tacoEsq, path_lenght, colisao, atingiu, oscilacoes
-v_Left = 0.5
-v_Right = 0.5
-colisao = False
-atingiu = False
-oscilacoes = 0
-
-
 def init():
+	global clientID, nomeSensor, sensorHandle, dist, leftMotorHandle, rightMotorHandle, handle_robo, handle_casterWheel
+	serverIP = "127.0.0.1"
+	serverPort = 19999
+	#---------------------Conecta no servidor---------------------------------
+	clientID = vrep.simxStart(serverIP, serverPort, True, True, 2000, 5)
+	nomeSensor = []
+	sensorHandle = []
+	dist = []
+	leftMotorHandle = 0
+	rightMotorHandle = 0
+	handle_robo = 0
+	handle_casterWheel = 0
 	if (clientID!=-1):
 		print ("Servidor Conectado!")
-		handle_robo = vrep.simxGetObjectHandle(clientID, Pioneer_p3dx, vrep.simx_opmode_oneshot_wait)
-	#------------------------------Inicializa Sensores ----------------------------
+		res, handle_robo = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx", vrep.simx_opmode_oneshot_wait)
+		res, handle_casterWheel = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_caster_freeJoint1", vrep.simx_opmode_oneshot_wait)
+		#------------------------------Inicializa Sensores ----------------------------
 		for i in range(0,8):
 			nomeSensor.append("sensor" + str(i+1))
 
@@ -56,16 +52,34 @@ def init():
 	else:
 		print ("Servidor nao conectado!")
 
-	#-----------------Inicializa localizacao------------------
-	localizacao = localization.localizacao()
-	localization.iniciar(clientID)
-
 	#model =  load_model('Redes/SLP_D.h5')# create the original model
 	#slp_model = Model(inputs=model.input, outputs=model.output)
 	#layer = slp_model.get_layer(name=None, index=1)
 	#print layer.get_weights()
 
+def reset():
+	global v_Left, v_Right, clientID, handle_robo, posRoboVrep, leftMotorHandle, rightMotorHandle, handle_casterWheel
+	v_Left = 0
+	v_Right = 0
+	"""resRight, rightWheelHandle = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_rightWheel_visible", vrep.simx_opmode_oneshot_wait)
+	resRight, leftWheelHandle = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_leftWheel_visible", vrep.simx_opmode_oneshot_wait)
+	resRight, casterWheelHandle = vrep.simxGetObjectHandle(clientID, "Pioneer_p3dx_caster_wheel_visible", vrep.simx_opmode_oneshot_wait)
+
+	posLeftMotor = [posRoboVrep[0]+0.04451, posRoboVrep[1]+0.16550,  posRoboVrep[2]-0.041252]
+	posRightMotor = [posRoboVrep[0]+0.044515, posRoboVrep[1]-0.16550,  posRoboVrep[2]-0.041252]
+	posCaster = [posRoboVrep[0]-0.14903, posRoboVrep[1]-0.0000012644,  posRoboVrep[2]-0.077842]
+	vrep.simxSetObjectPosition(clientID, handle_robo, -1, posRoboVrep, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, leftMotorHandle, -1, posLeftMotor, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, rightMotorHandle, -1, posRightMotor, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, handle_casterWheel, -1, posCaster, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, rightWheelHandle, -1, posRightMotor, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, leftWheelHandle, -1, posLeftMotor, vrep.simx_opmode_oneshot)
+	vrep.simxSetObjectPosition(clientID, casterWheelHandle, -1, posCaster, vrep.simx_opmode_oneshot)
+	"""
+	vrep.simxStopSimulation(clientID, vrep.simx_opmode_oneshot)
+
 def getPesosIniciais(rede):
+	global slp_model
 	if rede == 'A':
 		model =  load_model('Redes/SLP_A.h5')
 
@@ -98,14 +112,29 @@ def getPesosIniciais(rede):
 	return layer.get_weights()
 
 def getParametros(ambiente, posicao, pesos):
-	global padrao, posInicial, posVrep
+	vrep.simxStartSimulation(clientID, vrep.simx_opmode_oneshot)
+
+	global v_Left, v_Right, dist, slp_model, colisao, oscilacoes, path_lenght, atingiu, clearance
+	global padrao, posInicial, posRoboVrep, handle_robo, clientID, localizacao
+
+	#-----------------Inicializa localizacao------------------
+	localizacao = localization.localizacao()
+	localization.iniciar(clientID)
+	v_Left = 0.5
+	v_Right = 0.5
+	colisao = False
+	atingiu = False
+	oscilacoes = 0
+	clearance = 0
+
 	padrao = ambiente
 	posInicial = posicao
-	posRoboVrep = simxGetObjectPosition(clientID, handle_robo, -1, simx_opmode_streaming)
+	#posRoboVrep = vrep.simxGetObjectPosition(clientID, handle_robo, -1, vrep.simx_opmode_streaming)[1]
+	posRoboVrep = [-1.7445, 1.2500, 0.1388]
+	#print "POSICAO VREP: ", posRoboVrep
 	leituras = []
 	saidas = []
 	inicio = time.time()
-	clearance = 0
 	#---------------------------Loop principal ---------------------------------------
 	while vrep.simxGetConnectionId(clientID) != -1:
 
@@ -148,10 +177,8 @@ def getParametros(ambiente, posicao, pesos):
 			thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 			#print math.degrees(thetaAlvo)
 			if(thetaAlvo == 0.0):
-				v_Left = 0.0
-				v_Right = 0.0
 				atingiu = True
-				simxSetObjectPosition(clientID, handle_robo, -1, posRoboVrep, simx_opmode_oneshot)
+				reset()
 				return colisao, oscilacoes, path_lenght, atingiu, clearance
 
 				#print "clr: ", clearance
@@ -175,17 +202,18 @@ def getParametros(ambiente, posicao, pesos):
 					oscilacoes = oscilacoes+1
 			print "Saida: ", math.degrees(output*math.pi)
 
-			if ((time.time() - inicio) > 30) and not atingiu:
+			if ((time.time() - inicio) > 3) and not atingiu:
 				print "TIMEOUT"
-				simxSetObjectPosition(clientID, handle_robo, -1, posRoboVrep, simx_opmode_oneshot)
+				reset()
 				return colisao, oscilacoes, path_lenght, atingiu, clearance
 		dist=[]
-	simxSetObjectPosition(clientID, handle_robo, -1, posRoboVrep, simx_opmode_oneshot)
+	reset()
 	return colisao, oscilacoes, path_lenght, atingiu, clearance
 
 
 
 def virar(angulo):
+	global v_Left, v_Right, localizacao
 	thetaInicial = localizacao.getOrientacao()
 	#print thetaInicial
 	if(angulo > 0):

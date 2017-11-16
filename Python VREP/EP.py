@@ -14,7 +14,8 @@ class cromossomo():
         self.Q2 = 1
         self.Q3 = 1
         self.Q4 = 1
-        self.alpha = 1
+        self.Q5 = 1
+        self.alfa = 1
         self.beta = 1
         self.fitness = 0
 
@@ -58,7 +59,7 @@ class cromossomo():
 class EP:
     def __init__(self, pesosIniciais):
         self.population = []
-        self.population_size = 30
+        self.population_size = 3
         self.generations = 200
         self.elite_size = 3
         self.mutation_rate = 2   #Quantidade de genes a serem mutados
@@ -69,50 +70,58 @@ class EP:
         self.Ma_min = 1
         self.Ma_max = 99 #Adaptive mutantion bounds
         self.delta_Ma = 1    #Adaptive Mutation incremet
-        self.P_adaptive
+        self.P_adaptive = 0
         self.next_generation = []
 
         self.intensidadeMutacao = 0.1
+        convergiu = False
 
         global ambiente, posicaoInicial
         ambiente = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
         posicaoInicial = raw_input('Qual a posicao inicial do robo? ')
 
-        iniciaPopulacao(self.population_size, pesosIniciais)
+        self.iniciaPopulacao(self.population_size, pesosIniciais)
 
         for cromossomo in self.population:
             Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial, cromossomo.getGenes())
+            #print Col, ", ", Osc, ", ",Lng,", ", Arr,", ",Clr
             cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
-            evaluation(cromossomo)
+            self.evaluation(cromossomo)
 
-        for generation in range(generations):
+        for generation in range(self.generations):
             self.next_generation = []
             print "Generation: "+str(generation)
             #condição de parada
-
+            print "Fitness = ", cromossomo.getFitness()
             for cromossomo in self.population:
                 if cromossomo.getFitness() <= 80.0:
-                    print "Condição de Parada: Fitness"
-                    break
+                    print "CONVERGIU"
+                    convergiu = True
+            if convergiu:
+                break
 
             for cromossomo in self.population:
-                mutation(cromossomo)    #mutation
+                self.mutation(cromossomo)    #mutation
                 Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial,cromossomo.getGenes())
+                #print Col, ", ", Osc, ", ",Lng,", ", Arr,", ",Clr
                 cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
-                evaluation(cromossomo)            #evaluation então, aqui que tem que fazer a integração com a rede
-
-            selection(self.population)
+                self.evaluation(cromossomo)            #evaluation então, aqui que tem que fazer a integração com a rede
+            print "------------SELECAO------------"
+            self.selection()
 
             for cromossomo in self.population:      #restante dos elementos são mutados para serem levados a proxima geração
-                mutation(cromossomo)
+                self.mutation(cromossomo)
                 self.next_generation.append(cromossomo)
+
+            print "---------NEXT GENERATION---------"
+            print self.next_generation
 
             self.population = list(self.next_generation)
 
     def iniciaPopulacao(self, population_size, pesos):
         for i  in range(population_size):
             self.population.append(cromossomo(pesos))
-
+        print "----------POPULACAO INICIAL-------------"
 
     def evaluation(self, cromossomo):
         self.verificaCusto_S(cromossomo)
@@ -120,21 +129,30 @@ class EP:
         cromossomo.setFitness((cromossomo.alfa*cromossomo.custoS) + (cromossomo.beta*cromossomo.custoP))
 
     def verificaCusto_P(self, cromossomo):
-        #cromossomo.custoP = 0
-        cromossomo.custoP = (cromossomo.Q1*(cromossomo.Col*10000) + cromossomo.Q2*(cromossomo.Osc*0.1) + cromossomo.Q3*cromossomo.Lng + cromossomo.Q4*(cromossomo.Arr*100) + cromossomo.Q5*cromossomo.Clr)
+        cromossomo.custoP = 0
+        if cromossomo.Col:
+            cromossomo.custoP = cromossomo.custoP + cromossomo.Q1*10000
+
+        if not cromossomo.Arr:
+            cromossomo.custoP = cromossomo.custoP + cromossomo.Q4*100
+
+        cromossomo.custoP =  cromossomo.custoP + cromossomo.Q2*(cromossomo.Osc*0.1) + cromossomo.Q3*cromossomo.Lng + cromossomo.Q5*cromossomo.Clr
 
     def verificaCusto_S(self, cromossomo):
         for i in range(cromossomo.cromossomo_size):
             if(i < 9):
-                cromossomo.custoS  = cromossomo[i]
+                cromossomo.custoS  = cromossomo.custoS + cromossomo.getGenes()[i]
 
     def selection(self):
-        elitism()
-        for i in range(tournament_size):
+        print "---------ELITISMO---------"
+        self.elitism()
+        for i in range(self.tournament_size):
+            print "---------TORNEIO---------"
             self.tournament_selection()
 
     def elitism(self):
         #Rank-based
+        fitness_list = []
         for cromossomo in self.population:
             fitness_list.append(cromossomo.fitness)
         rank_based = sorted(fitness_list)
@@ -147,19 +165,20 @@ class EP:
 
     def tournament_selection(self):
         #implements tournament selection
-        #randomly select 2 and have them fight to get into parentPool
+        #select fighters randomly popSize-1 times (elitism takes one slot)
+        if len(self.population) > 1:
+            p1index = random.randint(0, len(self.population))
+            p2index = random.randint(0, len(self.population))
 
-        for i in range(self.population_size):
-            #select fighters randomly popSize-1 times (elitism takes one slot)
-            p1index = random.randint(0,self.population_size)
-            p2index = random.randint(0,self.population_size)
+            print "P1: ", p1index, " P2: ", p2index, " len: ", len(self.population)
             while(p2index == p1index):
-                p2index = random.randint(0, self.population_size)
+                p2index = random.randint(0, len(self.population))
+                print "P1: ", p1index, " P2: ", p2index, " len: ", len(self.population)
 
             cromossomo1 = self.population[p1index]
             cromossomo2 = self.population[p2index]
 
-            winner = fight(cromossomo1, cromossomo2)
+            winner = self.fight(cromossomo1, cromossomo2)
             #print 'adding %sth parent'%str(i)
             self.next_generation.append(winner)
             self.population.remove(winner)
@@ -214,7 +233,7 @@ class EP:
 
         rank = sorted(fitness_list)
 
-        for i in range(length):
+        for i in range(length-1):
             if (rank[i] == rank[i+1]):
                 similar = similar + 1
                 matched = True
@@ -223,10 +242,14 @@ class EP:
                 matched = False
 
             #se esta na ultima posicao
-            if(matched and (i+1 == length)):
+            if(matched and (i+1 == length-1)):
                 similar = similar + 1
         return (similar/length)
 
 EP2SLP.init()
 pesosIniciais = EP2SLP.getPesosIniciais('D')
-ep = EP(pesosIniciais)
+pesos = []
+for valor in pesosIniciais[0]:
+    pesos.append(valor[0])
+print pesos
+ep = EP(pesos)
