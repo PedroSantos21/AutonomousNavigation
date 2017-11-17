@@ -18,8 +18,8 @@ dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
 global v_Left, v_Right, tacoDir, tacoEsq, path_lenght, colisao, atingiu, oscilacoes
-v_Left = 0.5
-v_Right = 0.5
+v_Left =1
+v_Right = 1
 colisao = False
 atingiu = False
 oscilacoes = 0
@@ -58,7 +58,7 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/SLP_I.h5')# create the original model
+model =  load_model('Redes/SLP_B.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
 layer = slp_model.get_layer(name=None, index=1)
 print layer.get_weights()
@@ -229,8 +229,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			#print "oscilacoes: ", oscilacoes
 			#--------------RETORNAR VALORES PRO EP----------------
 		else:
-			v_Left = 0.5
-			v_Right = 0.5
+			v_Left = 1
+			v_Right = 1
 		entradas.append(thetaAlvo/(math.pi))
 
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
@@ -244,7 +244,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		if len(saidas) > 2:
 			if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
 				oscilacoes = oscilacoes+1
-				
+
 		print "Saida: ", math.degrees(output*math.pi)
 
 		if ((time.time() - inicio) > 30) and not atingiu:

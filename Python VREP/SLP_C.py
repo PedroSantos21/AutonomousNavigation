@@ -11,7 +11,7 @@ output_treinamento= np.genfromtxt('PadraoC/SaidaC.txt', delimiter='None')
 
 model = Sequential()
 
-model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
+model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=False))
 sgd = SGD(lr=0.0005, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='mean_squared_error',
              optimizer= sgd,

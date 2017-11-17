@@ -55,9 +55,9 @@ class cromossomo():
 
 
 class EP:
-    def __init__(self, pesosIniciais):
+    def __init__(self, pesosIniciais, ambiente, posicaoInicial):
         self.population = []
-        self.population_size = 3
+        self.population_size = 5
         self.generations = 200
         self.elite_size = 3
         self.mutation_rate = 2   #Quantidade de genes a serem mutados
@@ -67,43 +67,51 @@ class EP:
         self.St = 0.15  #Similarity Threshold
         self.Ma_min = 1
         self.Ma_max = 99 #Adaptive mutantion bounds
-        self.delta_Ma = 1    #Adaptive Mutation incremet
+        self.delta_Ma = 10    #Adaptive Mutation incremet
         self.P_adaptive = 0
         self.next_generation = []
-
+        self.best_fitness = 100000
+        self.fitness_list = []
         self.intensidadeMutacao = 0.1
         convergiu = False
-
-        global ambiente, posicaoInicial
-        ambiente = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
-        posicaoInicial = raw_input('Qual a posicao inicial do robo? ')
 
         self.iniciaPopulacao(self.population_size, pesosIniciais)
 
         for cromossomo in self.population:
             Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial, cromossomo.getGenes())
-            #print Col, ", ", Osc, ", ",Lng,", ", Arr,", ",Clr
+            print "Col: ", Col, ", Osc: ", Osc, ", Lng: ",Lng,", Arr: ", Arr,", Clr: ",Clr
             cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
             self.evaluation(cromossomo)
+            print "Fitness: ", cromossomo.getFitness()
+        self.sort_fitness()
 
         for generation in range(self.generations):
             self.next_generation = []
             print "Generation: "+str(generation)
-            #condição de parada
-            print "Fitness = ", cromossomo.getFitness()
+
+            #CHECA SE JA TERMINOU
             for cromossomo in self.population:
-                if cromossomo.getFitness() <= 80.0:
-                    print "CONVERGIU"
+                if self.best_fitness <= 30.0:
+                    print "CONVERGIU COM ", self.best_fitness
                     convergiu = True
+                    for cromossomo in self.population:
+                        if self.best_fitness == cromossomo.fitness:
+                            EP2SLP.salvarRede(cromossomo.getGenes())
+                            break
+                    break
             if convergiu:
+                print "-----------FIM------------"
                 break
 
             for cromossomo in self.population:
                 self.mutation(cromossomo)    #mutation
                 Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial,cromossomo.getGenes())
-                #print Col, ", ", Osc, ", ",Lng,", ", Arr,", ",Clr
+                print "Col: ", Col, ", Osc: ", Osc, ", Lng: ",Lng,", Arr: ", Arr,", Clr: ",Clr
                 cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
                 self.evaluation(cromossomo)            #evaluation então, aqui que tem que fazer a integração com a rede
+                print "Fitness: ", cromossomo.getFitness()
+            self.sort_fitness()
+
             print "------------SELECAO------------"
             self.selection()
 
@@ -122,8 +130,8 @@ class EP:
             self.population.append(cromossomo(pesos))
         print "----------POPULACAO INICIAL-------------"
 
-        #for individuo in self.population:
-        #    print individuo.getGenes()
+        for individuo in self.population:
+            print individuo.getGenes()
 
     def evaluation(self, cromossomo):
         self.verificaCusto_S(cromossomo)
@@ -148,19 +156,23 @@ class EP:
     def selection(self):
         print "---------ELITISMO---------"
         self.elitism()
+        print "---------TORNEIO---------"
         for i in range(self.tournament_size):
-            print "---------TORNEIO---------"
             self.tournament_selection()
+
+    def sort_fitness(self):
+        self.fitness_list = []
+        for cromossomo in self.population:
+            self.fitness_list.append(cromossomo.fitness)
+        self.fitness_list = sorted(self.fitness_list)
+        print "MELHOR FITNESS: ", self.fitness_list[0]
+        self.best_fitness = self.fitness_list[0]
 
     def elitism(self):
         #Rank-based
-        fitness_list = []
-        for cromossomo in self.population:
-            fitness_list.append(cromossomo.fitness)
-        rank_based = sorted(fitness_list)
         for i in range(3):
             for cromossomo in self.population:
-                if rank_based[i] == cromossomo.fitness:
+                if self.fitness_list[i] == cromossomo.fitness:
                     self.next_generation.append(cromossomo)
                     self.population.remove(cromossomo)
                     break
@@ -169,13 +181,13 @@ class EP:
         #implements tournament selection
         #select fighters randomly popSize-1 times (elitism takes one slot)
         if len(self.population) > 1:
-            p1index = random.randint(0, len(self.population))
-            p2index = random.randint(0, len(self.population))
+            p1index = random.randint(0, len(self.population)-1)
+            p2index = random.randint(0, len(self.population)-1)
 
             print "P1: ", p1index, " P2: ", p2index, " len: ", len(self.population)
             while(p2index == p1index):
-                p2index = random.randint(0, len(self.population))
-                print "P1: ", p1index, " P2: ", p2index, " len: ", len(self.population)
+                p2index = random.randint(0, len(self.population)-1)
+                print "P1: ", p1index, " P2: ", p2index, " len: ",       len(self.population)
 
             cromossomo1 = self.population[p1index]
             cromossomo2 = self.population[p2index]
@@ -197,22 +209,29 @@ class EP:
 
     #Self-adaptive mutation
     def mutation(self, cromossomo):
+        print "-------MUTACAO--------"
         genesMutados = []
         similar = self.similarity()
+        print "Similar ", similar
         if(similar >= self.St):
             self.P_adaptive = self.P_adaptive + self.delta_Ma
         else:
-            self.P_adaptive = self.P_adaptive - self.delta_Ma
+            if self.P_adaptive > 0:
+                self.P_adaptive = self.P_adaptive - self.delta_Ma
+
+        print "P_adaptive: ", self.P_adaptive
+
         probability = random.randint(0, 100)
 
-        if(probability <= self.P_adaptive*100):
+        if(probability <= self.P_adaptive):
+            print "------MUTOU-------"
             for i in range(self.mutation_rate):
-                gene = random.randint(9, 18)
+                gene = random.randint(cromossomo.cromossomo_size/2, cromossomo.cromossomo_size-1)
 
                 while(gene in genesMutados):
-                   gene = random.randint(9, 18)
-
-                incremento = cromossomo.getGenes()[gene]*self.intensidadeMutacao
+                   gene = random.randint(cromossomo.cromossomo_size/2, cromossomo.cromossomo_size-1)
+                print "Gene mutado: ", gene
+                incremento = (cromossomo.getGenes()[gene])*self.intensidadeMutacao
                 fatorAditivo = random.randint(1, 3)  #fator para definir se será decremento ou incremento
                 if(fatorAditivo == 1):   #soma
                     cromossomo.setGenes(gene, (incremento+cromossomo.getGenes()[gene]))
@@ -221,37 +240,41 @@ class EP:
 
                 genesMutados.append(gene)
 
-
-
     #define o nivel de similaridade da populacao
     def similarity(self):
         fitness_list = []
-        similar = 0
+        similar = 0.0
         matched = False
-        length = self.population_size
+        length = len(self.population)
 
-        for cromossomo in self.population:
-            fitness_list.append(cromossomo.fitness)
-
-        rank = sorted(fitness_list)
+        self.sort_fitness()
+        rank = []
+        for fitness in self.fitness_list:
+            rank.append(round(fitness))
 
         for i in range(length-1):
-            if (rank[i] == rank[i+1]):
-                similar = similar + 1
+            if (rank[i] >= rank[i+1] - 2 and rank[i] <= rank[i+1]+2):
+                similar = similar + 1.0
                 matched = True
+                print "MATCH"
             elif (matched):
-                similar = similar + 1
+                similar = similar + 1.0
                 matched = False
 
             #se esta na ultima posicao
             if(matched and (i+1 == length-1)):
-                similar = similar + 1
-        return (similar/length)
+                similar = similar + 1.0
+        return (similar/length)*1.0
 
 EP2SLP.init()
-pesosIniciais = EP2SLP.getPesosIniciais('D')
+
+ambiente = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
+posicaoInicial = raw_input('Qual a posicao inicial do robo? ')
+
+pesosIniciais = EP2SLP.getPesosIniciais(ambiente)
+#print pesosIniciais
 pesos = []
 for valor in pesosIniciais[0]:
     pesos.append(valor[0])
 #print pesos
-ep = EP(pesos)
+ep = EP(pesos, ambiente, posicaoInicial)

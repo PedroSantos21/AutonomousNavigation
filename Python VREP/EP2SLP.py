@@ -26,6 +26,7 @@ def init():
 	leftMotorHandle = 0
 	rightMotorHandle = 0
 	thread.start_new_thread(listen_keyboard,())
+	thread.start_new_thread(calcula_tempo,())
 
 	if (clientID!=-1):
 		print ("Servidor Conectado!")
@@ -56,6 +57,7 @@ def init():
 			print("Motor Direito: Conectado")
 	else:
 		print ("Servidor nao conectado!")
+	reset()
 
 	#model =  load_model('Redes/SLP_D.h5')# create the original model
 	#slp_model = Model(inputs=model.input, outputs=model.output)
@@ -67,7 +69,7 @@ def reset():
 	v_Left = 0
 	v_Right = 0
 	if vrep.simxGetConnectionId(clientID) != -1:
-		vrep.simxStopSimulation(clientID, vrep.simx_opmode_oneshot)
+		status = vrep.simxStopSimulation(clientID, vrep.simx_opmode_blocking)
 		time.sleep(0.5)
 
 def getPesosIniciais(rede):
@@ -103,31 +105,39 @@ def getPesosIniciais(rede):
 	layer = slp_model.get_layer(name=None, index=1)
 	return layer.get_weights()
 
-def generate_model(pesos):
-	model = Sequential()
-	model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
-	#sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-	#model.compile(loss='mean_squared_error', optimizer= sgd, metrics=['accuracy'])
-
-	#layer = model.get_layer(name=None, index=1)
-	model.set_weights(np.array([pesos]))
-
-	return model
-
-def getParametros(ambiente, posicao, pesos):
-	global v_Left, v_Right, dist, colisao, oscilacoes, path_lenght, atingiu, clearance
-	global padrao, posInicial, clientID, localizacao
+def salvarRede(pesos):
+	global slp_model, padrao, clientID
+	print "-----------------SALVANDO MELHOR INDIVIDUO------------------"
 	pesos_rede = []
 	for i in range(len(pesos)):
 		if(i < len(pesos)/2):
 			continue
-		pesos_rede.append(pesos[i])
+		pesos_rede.append([pesos[i]])
+	slp_model.get_layer(name=None, index=1).set_weights([np.array(pesos_rede)])
 
-	slp_model = generate_model(pesos_rede)
+	sgd = SGD(lr=0.0005, decay=1e-6, momentum=0.9, nesterov=True)
+	slp_model.compile(loss='mean_squared_error', optimizer= sgd, metrics=['accuracy'])
+
+	slp_model.save('Redes/SLP_'+str(padrao)+'.h5')
+	vrep.simxFinish(clientID)
+
+def getParametros(ambiente, posicao, pesos):
+	global v_Left, v_Right, dist, colisao, oscilacoes, path_lenght, atingiu, clearance, slp_model
+	global padrao, posInicial, clientID, localizacao, exec_time
+
 	if vrep.simxGetConnectionId(clientID) != -1:
-		e = vrep.simxStartSimulation(clientID, vrep.simx_opmode_oneshot)
-		#print "Start ", e
+		e = vrep.simxStartSimulation(clientID, vrep.simx_opmode_blocking)
 		time.sleep(0.5)
+		pesos_rede = []
+		print "--------------AVALIANDO CROMOSSOMO----------------"
+		print pesos
+		for i in range(len(pesos)):
+			if(i < len(pesos)/2):
+				continue
+			pesos_rede.append([pesos[i]])
+		#print "pesos_rede ", [np.array(pesos_rede)]
+		slp_model.get_layer(name=None, index=1).set_weights([np.array(pesos_rede)])
+
 		#-----------------Inicializa localizacao------------------
 		localizacao = localization.localizacao()
 		localization.iniciar(clientID)
@@ -145,7 +155,7 @@ def getParametros(ambiente, posicao, pesos):
 		#print "POSICAO VREP: ", posRoboVrep
 		leituras = []
 		saidas = []
-		inicio = time.time()
+		inicio = exec_time
 		#---------------------------Loop principal ---------------------------------------
 		while vrep.simxGetConnectionId(clientID) != -1:
 
@@ -168,7 +178,7 @@ def getParametros(ambiente, posicao, pesos):
 					else:
 						dist.append(5.0)
 				#print math.degrees(thetaRobo-getThetaAlvo(thetaRobo, xRobo, yRobo))
-				time.sleep(0.01)
+				time.sleep(0.0001)
 
 			thetaRobo = localizacao.getOrientacao()
 			xRobo, yRobo = localizacao.getPosicao()
@@ -179,16 +189,20 @@ def getParametros(ambiente, posicao, pesos):
 				for n in range(len(dist)):
 					dist[n] = dist[n]/5.0
 					entradas.append(dist[n])
-					if(dist[n] <= 0.01):
+					#print entradas
+					if(dist[n] <= 0.015):
 						colisao = True
+						print "COLIDIU"
+						reset()
+						return colisao, oscilacoes, path_lenght, atingiu, clearance
 
 				if min(dist) < 0.05:
 					clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
 
 				thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 				#print math.degrees(thetaAlvo)
-				if(thetaAlvo == 0.0):
-					atingiu = True
+				if atingiu:
+					print "ATINGIU"
 					reset()
 					return colisao, oscilacoes, path_lenght, atingiu, clearance
 
@@ -201,7 +215,7 @@ def getParametros(ambiente, posicao, pesos):
 				entradas.append(thetaAlvo/(math.pi))
 
 				#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
-				print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
+				#print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 
 				output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
 				saidas.append(output)
@@ -211,9 +225,9 @@ def getParametros(ambiente, posicao, pesos):
 				if len(saidas) > 2:
 					if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
 						oscilacoes = oscilacoes+1
-				print "Saida: ", math.degrees(output*math.pi)
-
-				if ((time.time() - inicio) > 60) and not atingiu:
+				#print "Saida: ", math.degrees(output*math.pi)
+				#print exec_time - inicio
+				if ((exec_time - inicio) > 60) and not atingiu:
 					print "TIMEOUT"
 					reset()
 					return colisao, oscilacoes, path_lenght, atingiu, clearance
@@ -222,7 +236,7 @@ def getParametros(ambiente, posicao, pesos):
 	return colisao, oscilacoes, path_lenght, atingiu, clearance
 
 def virar(angulo):
-	global v_Left, v_Right, localizacao
+	global v_Left, v_Right, localizacao, exec_time
 	thetaInicial = localizacao.getOrientacao()
 	#print thetaInicial
 	if(angulo > 0):
@@ -230,6 +244,7 @@ def virar(angulo):
 		v_Left = -0.5
 		v_Right = 0.5
 		while(abs(thetaInicial - localizacao.getOrientacao()) < abs(angulo)):
+			exec_time = time.time()
 			vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 			vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
@@ -241,6 +256,7 @@ def virar(angulo):
 		v_Left = 0.5
 		v_Right = -0.5
 		while(abs(thetaInicial - localizacao.getOrientacao()) < abs(angulo)):
+			exec_time = time.time()
 			vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
 			vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 
@@ -253,7 +269,7 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 	xAlvo = 0
 	yAlvo = 0
 	tolerancia = 0.5
-	global posInicial, padrao
+	global posInicial, padrao, atingiu
 
 	if padrao == 'A':
 	# ------------- Posicao1 --------------
@@ -330,7 +346,14 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 
 	if (abs(xRobo - xAlvo) < tolerancia) and (abs(yRobo - yAlvo) < tolerancia):
 		thetaAlvo = 0
+		atingiu = True
+
 	return thetaAlvo
+
+def calcula_tempo():
+	global exec_time
+	while vrep.simxGetConnectionId(clientID) != -1:
+		exec_time = time.time()
 
 def listen_keyboard():
 	with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
