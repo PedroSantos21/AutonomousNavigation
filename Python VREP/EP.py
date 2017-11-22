@@ -3,7 +3,6 @@ import random
 from scipy.stats import norm
 import numpy
 import EP2SLP
-#PARÂMETROS DO EP --> EP diferencia-se de AG pelo uso somente de mutação
 class cromossomo():
     def __init__ (self, pesosIniciais):
         #Funçao de Custo
@@ -17,7 +16,7 @@ class cromossomo():
         self.Q5 = 1
         self.alfa = 1
         self.beta = 1
-        self.fitness = 0
+        self.fitness = 10000000
 
         self.Col = 0
         self.Osc = 0
@@ -41,7 +40,8 @@ class cromossomo():
         return self.genes
 
     def setFitness(self, fitness):
-        self.fitness = fitness
+        if self.fitness > fitness:
+            self.fitness = fitness
 
     def getFitness(self):
         return self.fitness
@@ -53,21 +53,20 @@ class cromossomo():
         self.Arr = Arr
         self.Clr = Clr
 
-
 class EP:
     def __init__(self, pesosIniciais, ambiente, posicaoInicial):
         self.population = []
-        self.population_size = 5
+        self.population_size = 20
         self.generations = 200
         self.elite_size = 3
         self.mutation_rate = 2   #Quantidade de genes a serem mutados
-        self.tournament_size = 15
+        self.tournament_size = 5
 
         #Self-adaptive mutation #Alterar valores de acordo com nosso problema
         self.St = 0.15  #Similarity Threshold
         self.Ma_min = 1
         self.Ma_max = 99 #Adaptive mutantion bounds
-        self.delta_Ma = 10    #Adaptive Mutation incremet
+        self.delta_Ma = 10      #Adaptive Mutation incremet
         self.P_adaptive = 0
         self.next_generation = []
         self.best_fitness = 100000
@@ -91,7 +90,7 @@ class EP:
 
             #CHECA SE JA TERMINOU
             for cromossomo in self.population:
-                if self.best_fitness <= 30.0:
+                if self.best_fitness <= 50.0:
                     print "CONVERGIU COM ", self.best_fitness
                     convergiu = True
                     for cromossomo in self.population:
@@ -104,12 +103,15 @@ class EP:
                 break
 
             for cromossomo in self.population:
-                self.mutation(cromossomo)    #mutation
+                #self.mutation(cromossomo)    #mutation
+
                 Col, Osc, Lng, Arr, Clr = EP2SLP.getParametros(ambiente, posicaoInicial,cromossomo.getGenes())
                 print "Col: ", Col, ", Osc: ", Osc, ", Lng: ",Lng,", Arr: ", Arr,", Clr: ",Clr
                 cromossomo.setParam(Col, Osc, Lng, Arr, Clr)
+
                 self.evaluation(cromossomo)            #evaluation então, aqui que tem que fazer a integração com a rede
                 print "Fitness: ", cromossomo.getFitness()
+
             self.sort_fitness()
 
             print "------------SELECAO------------"
@@ -214,7 +216,8 @@ class EP:
         similar = self.similarity()
         print "Similar ", similar
         if(similar >= self.St):
-            self.P_adaptive = self.P_adaptive + self.delta_Ma
+            if self.P_adaptive < 100:
+                self.P_adaptive = self.P_adaptive + self.delta_Ma
         else:
             if self.P_adaptive > 0:
                 self.P_adaptive = self.P_adaptive - self.delta_Ma
@@ -256,7 +259,7 @@ class EP:
             if (rank[i] >= rank[i+1] - 2 and rank[i] <= rank[i+1]+2):
                 similar = similar + 1.0
                 matched = True
-                print "MATCH"
+                #print "MATCH"
             elif (matched):
                 similar = similar + 1.0
                 matched = False

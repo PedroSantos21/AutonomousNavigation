@@ -182,8 +182,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 3.5
 	elif padrao == 'E':
 		if posInicial == '1':
-			xAlvo = 0.8
-			yAlvo = -3.6
+			xAlvo = 0.5
+			yAlvo = -3.2
 	elif padrao == 'F':
 		if posInicial == '1':
 			xAlvo = 2.5
@@ -268,7 +268,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
-			leituras.append(dist[n])
+			#leituras.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True
 		if min(dist) < 0.05:
@@ -283,8 +283,10 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			print "ATINGIU"
 			#print min(leituras)
 			print clearance
-
+		
 		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/math.pi)
+		
+		
 		saida = str((thetaRobo-thetaRoboAnt)/(math.pi))
 
 		lista_entradas.append(entradas)

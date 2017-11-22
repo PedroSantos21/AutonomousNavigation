@@ -314,8 +314,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 3.5
 	elif padrao == 'E':
 		if posInicial == '1':
-			xAlvo = 0.8
-			yAlvo = -3.6
+			xAlvo = 0.5
+			yAlvo = -3.2
 	elif padrao == 'F':
 		if posInicial == '1':
 			xAlvo = 2.5

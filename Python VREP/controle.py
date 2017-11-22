@@ -18,8 +18,8 @@ dist = []
 leftMotorHandle = 0
 rightMotorHandle = 0
 global v_Left, v_Right, tacoDir, tacoEsq, path_lenght, colisao, atingiu, oscilacoes
-v_Left =1
-v_Right = 1
+v_Left =0.5
+v_Right = 0.5
 colisao = False
 atingiu = False
 oscilacoes = 0
@@ -58,7 +58,7 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/SLP_B.h5')# create the original model
+model =  load_model('Redes/SLP_D.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
 layer = slp_model.get_layer(name=None, index=1)
 print layer.get_weights()
@@ -142,8 +142,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 3.5
 	elif padrao == 'E':
 		if posInicial == '1':
-			xAlvo = 0.8
-			yAlvo = -3.6
+			xAlvo = 0.5
+			yAlvo = -3.2
 	elif padrao == 'F':
 		if posInicial == '1':
 			xAlvo = 2.5
@@ -212,6 +212,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
+			#if n != 1 and n != 6:	
 			entradas.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True

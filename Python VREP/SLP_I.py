@@ -9,10 +9,16 @@ import numpy as np
 input_treinamento = np.genfromtxt('PadraoI/EntradaI.txt', delimiter=',')
 output_treinamento= np.genfromtxt('PadraoI/SaidaI.txt', delimiter='None')
 
+"""
+input_treinamento = []
+
+for vetor in input_txt:
+	input_treinamento.append([vetor[0], vetor[2], vetor[]])
+"""
 model = Sequential()
 
-model.add(Dense(units=1, activation='tanh', input_dim=9, use_bias=True, bias_initializer='zeros'))
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+model.add(Dense(units=1, activation='tanh', input_dim=7, use_bias=False))
+sgd = SGD(lr=0.0005, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='mean_squared_error',
              optimizer= sgd,
              metrics=['accuracy'])
