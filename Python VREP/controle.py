@@ -58,7 +58,7 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/SLP_D.h5')# create the original model
+model =  load_model('Redes/SLP_H.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
 layer = slp_model.get_layer(name=None, index=1)
 print layer.get_weights()
@@ -142,7 +142,7 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 3.5
 	elif padrao == 'E':
 		if posInicial == '1':
-			xAlvo = 0.5
+			xAlvo = 0.6
 			yAlvo = -3.2
 	elif padrao == 'F':
 		if posInicial == '1':
@@ -154,8 +154,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = -2.3
 	elif padrao == 'H':
 		if posInicial == '1':
-			xAlvo = 3.58
-			yAlvo = 0.2
+			xAlvo = 2.5
+			yAlvo = 0.0
 	elif padrao == 'I':
 		if posInicial == '1':
 			xAlvo = 7.85
@@ -212,8 +212,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
-			#if n != 1 and n != 6:	
-			entradas.append(dist[n])
+			if n != 0 and n != 1 and n != 4:
+				entradas.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True
 
@@ -230,8 +230,8 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			#print "oscilacoes: ", oscilacoes
 			#--------------RETORNAR VALORES PRO EP----------------
 		else:
-			v_Left = 1
-			v_Right = 1
+			v_Left = 0.5
+			v_Right = 0.5
 		entradas.append(thetaAlvo/(math.pi))
 
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
