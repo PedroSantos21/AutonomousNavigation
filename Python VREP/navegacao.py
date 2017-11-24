@@ -4,6 +4,7 @@ import vrep
 import keras
 import math
 import localization
+import blending
 import numpy as np
 from keras.models import Model
 from keras.models import load_model
@@ -57,15 +58,71 @@ else:
 #-----------------Inicializa localizacao------------------
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
+blending = blending.blending()
 
-model =  load_model('Redes/MLP_I.h5')# create the original model
-slp_model = Model(inputs=model.input, outputs=model.output)
-layer = slp_model.get_layer(name=None, index=1)
-print layer.get_weights()
+#model = load_model('Redes/MLP_I.h5')# create the original model
+#slp_model = Model(inputs=model.input, outputs=model.output)
+#layer = slp_model.get_layer(name=None, index=1)
+#print layer.get_weights()
 
 global padrao, posInicial
 padrao = raw_input('Qual Padrao de ambiente o robo sera inserido? ')
 posInicial = raw_input('Qual a posicao inicial do robo? ')
+
+global model
+
+model = []
+model.append(load_model('Redes/SLP_A.h5'))
+model.append(load_model('Redes/SLP_B.h5'))
+model.append(load_model('Redes/SLP_C.h5'))
+model.append(load_model('Redes/SLP_D.h5'))
+model.append(load_model('Redes/SLP_E.h5'))
+model.append(load_model('Redes/SLP_F.h5'))
+model.append(load_model('Redes/SLP_G.h5'))
+model.append(load_model('Redes/SLP_H.h5'))
+model.append(load_model('Redes/SLP_I.h5'))
+model.append(load_model('Redes/SLP_A.h5'))
+
+
+def calcula_saida(pesos_blending, entradas):
+    global model
+    indice2rede = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I', 'H']
+    saida = 0
+    output = 0
+    filtro = 1
+    entrada_rede = []
+
+    for i in range(len(pesos_blending)):
+	
+        #se há um peso, calcula o output
+        if pesos_blending[i] != 0:
+            #excecoes de entradas de algumas redes
+            if indice2rede[i] == 'A':
+                entrada_rede.append(entradas[8])
+            elif indice2rede[i] == 'C':
+                filtro = 0.3
+                for j in range(len(entradas)):
+                    if j != 1 and j != 6:
+                        entrada_rede.append(entrada[j])
+            elif indice2rede[i] == 'F':
+                filtro = 0.4
+            elif indice2rede[i] == 'G':
+                for j in range(len(entradas)):
+                    if j != 2 and j != 5:
+                        entrada_rede.append(entrada[j])
+            else:
+                for entrada in entradas:
+                    entrada_rede.append(entrada)
+	     
+            slp_model = Model(inputs=model[i].input, outputs=model[i].output)    
+            output = slp_model.predict(np.array([entrada_rede]), batch_size=1, verbose=0, steps=None)
+            #print "Saida da rede ", indice2rede[i]," = ", math.degrees(output*math.pi)
+            #print "Filtro = ", filtro
+            if (abs(math.degrees(output*math.pi)) > filtro):
+                saida = saida + output
+
+            filtro = 1
+    return saida
 
 def virar(angulo):
 	thetaInicial = localizacao.getOrientacao()
@@ -204,10 +261,11 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#print math.degrees(thetaRobo-getThetaAlvo(thetaRobo, xRobo, yRobo))
 		time.sleep(0.01)
 
+
 	thetaRobo = localizacao.getOrientacao()
 	xRobo, yRobo = localizacao.getPosicao()
 
-	if(len(dist)==8):
+	if(len(dist) == 8):
 		entradas = []
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
@@ -217,30 +275,33 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			if(dist[n] <= 0.01):
 				colisao = True
 
-		if min(dist) < 0.05:
-			clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
+		#if min(dist) < 0.05:
+		#	clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
+
+		blending.setLeituras(entradas)
+		padrao_blending = blending.definePadrao()
+		pesos_blending = blending.calculaPesos(padrao_blending)
 
 		thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
 		#print math.degrees(thetaAlvo)
 		if(thetaAlvo == 0.0):
-			v_Left = 0.0
-			v_Right = 0.0
-			atingiu = True
-			#print "clr: ", clearance
-			#print "oscilacoes: ", oscilacoes
-			#--------------RETORNAR VALORES PRO EP----------------
+		    v_Left = 0.0
+		    v_Right = 0.0
+		    atingiu = True
+		    #print "clr: ", clearance
+		    #print "oscilacoes: ", oscilacoes
 		else:
-			v_Left = 0.5
-			v_Right = 0.5
-		entradas.append(thetaAlvo/(math.pi))
+		    v_Left = 0.5
+		    v_Right = 0.5
 
+		entradas.append(thetaAlvo/(math.pi))
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
 		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 
-		output = slp_model.predict(np.array([entradas]), batch_size=1, verbose=0, steps=None)
+		output = calcula_saida(pesos_blending, entradas)
 		saidas.append(output)
-		if abs(math.degrees(output*math.pi)) > 1:
-			virar(output*math.pi)
+		#if abs(math.degrees(output*math.pi)) > 1:
+		virar(output*math.pi)
 
 		if len(saidas) > 2:
 			if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
@@ -248,10 +309,10 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 		print "Saida: ", math.degrees(output*math.pi)
 
-		if ((time.time() - inicio) > 30) and not atingiu:
+		if ((time.time() - inicio) > 200) and not atingiu:
 			#v_Left = 0.0
 			#v_Right = 0.0
 			print "TIMEOUT"
 
-			#--------------RETORNAR VALORES PRO EP----------------
+        #--------------RETORNAR VALORES PRO EP----------------
 	dist=[]

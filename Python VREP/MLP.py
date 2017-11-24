@@ -32,7 +32,7 @@ model.compile(loss='mean_squared_error',
              optimizer=sgd,
              metrics=['accuracy'])
 
-model.fit(input_treinamento, output_treinamento, epochs=120, batch_size=1, verbose=1)
+model.fit(input_treinamento, output_treinamento, epochs=500, batch_size=1, verbose=1)
 
 #score = model.evaluate(x_test, y_test, batch_size=1)
 

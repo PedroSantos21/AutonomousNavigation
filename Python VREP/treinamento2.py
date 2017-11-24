@@ -198,8 +198,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 0.0
 	elif padrao == 'I':
 		if posInicial == '1':
-			xAlvo = 7.85
-			yAlvo = 1.79
+			xAlvo = 4.9
+			yAlvo = 0.0
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	else:
@@ -283,10 +283,10 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			print "ATINGIU"
 			#print min(leituras)
 			print clearance
-		
+
 		entradas = str(dist[0])+", "+str(dist[1])+", "+str(dist[2])+", "+str(dist[3])+", "+str(dist[4])+", "+str(dist[5])+", "+str(dist[6])+", "+str(dist[7])+", "+str(thetaAlvo/math.pi)
-		
-		
+
+
 		saida = str((thetaRobo-thetaRoboAnt)/(math.pi))
 
 		lista_entradas.append(entradas)
