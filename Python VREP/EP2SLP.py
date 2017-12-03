@@ -65,9 +65,11 @@ def init():
 	#print layer.get_weights()
 
 def reset():
-	global v_Left, v_Right, clientID
+	global v_Left, v_Right, clientID, rightMotorHandle, leftMotorHandle
 	v_Left = 0
 	v_Right = 0
+	vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, v_Right, vrep.simx_opmode_streaming)
+	vrep.simxSetJointTargetVelocity(clientID, leftMotorHandle, v_Left, vrep.simx_opmode_streaming)
 	if vrep.simxGetConnectionId(clientID) != -1:
 		status = vrep.simxStopSimulation(clientID, vrep.simx_opmode_blocking)
 		time.sleep(0.5)
@@ -141,8 +143,8 @@ def getParametros(ambiente, posicao, pesos):
 		#-----------------Inicializa localizacao------------------
 		localizacao = localization.localizacao()
 		localization.iniciar(clientID)
-		v_Left = 1
-		v_Right = 1
+		v_Left = 0.5
+		v_Right = 0.5
 		colisao = False
 		atingiu = False
 		oscilacoes = 0
@@ -196,7 +198,7 @@ def getParametros(ambiente, posicao, pesos):
 						reset()
 						return colisao, oscilacoes, path_lenght, atingiu, clearance
 
-				if min(dist) < 0.05:
+				if min(dist) < 0.02:
 					clearance = clearance + 1.0 - min(dist)/(sum(dist)/len(dist))
 
 				thetaAlvo = getThetaAlvo(thetaRobo, xRobo, yRobo)
@@ -205,13 +207,13 @@ def getParametros(ambiente, posicao, pesos):
 					print "ATINGIU"
 					reset()
 					return colisao, oscilacoes, path_lenght, atingiu, clearance
-
+				        
 					#print "clr: ", clearance
 					#print "oscilacoes: ", oscilacoes
 					#--------------RETORNAR VALORES PRO EP----------------
 				else:
-					v_Left = 1
-					v_Right = 1
+					v_Left = 0.5
+					v_Right = 0.5
 				entradas.append(thetaAlvo/(math.pi))
 
 				#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
@@ -227,7 +229,7 @@ def getParametros(ambiente, posicao, pesos):
 						oscilacoes = oscilacoes+1
 				#print "Saida: ", math.degrees(output*math.pi)
 				#print exec_time - inicio
-				if ((exec_time - inicio) > 60) and not atingiu:
+				if ((exec_time - inicio) > 90) and not atingiu:
 					print "TIMEOUT"
 					reset()
 					return colisao, oscilacoes, path_lenght, atingiu, clearance
@@ -326,12 +328,12 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = -2.3
 	elif padrao == 'H':
 		if posInicial == '1':
-			xAlvo = 2.5
-			yAlvo = 0.0
+			xAlvo = -0.35
+			yAlvo = 1.86
 	elif padrao == 'I':
 		if posInicial == '1':
-			xAlvo = 7.85
-			yAlvo = 1.79
+			xAlvo = 4.9
+			yAlvo = 0.0
 
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
@@ -361,13 +363,13 @@ def listen_keyboard():
 
 def on_press(key):
 	global clientID
-	if key == keyboard.Key.esc:
+	if key == keyboard.Key.f7:
 		reset()
 		vrep.simxFinish(clientID)
 		#reset()
 
 def on_release(key):
 	global clientID
-	if key == keyboard.Key.esc:
+	if key == keyboard.Key.f7:
 		reset()
 		vrep.simxFinish(clientID)

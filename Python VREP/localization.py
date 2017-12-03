@@ -53,14 +53,14 @@ class localizacao(Thread):
 		Dr = dThetaDir*self.raio
 		Dl = dThetaEsq*self.raio
 		Dc = (Dl+Dr)/2
-		lenght = lenght + Dc
+		lenght = lenght + abs(Dc)
 		#print self.lenght
 		#print "Dr: "+str(Dr)+"Dl: "+str(Dl)
 
 		xpos = xpos+Dc*math.cos(theta)
 		ypos = ypos+Dc*math.sin(theta)
 		theta = theta + (Dr-Dl)/self.largura
-
+			
 		thetaDirAnt = thetaDir
 		thetaEsqAnt = thetaEsq
 

@@ -3,8 +3,10 @@ import random
 from scipy.stats import norm
 import numpy
 import EP2SLP
+import os.path
+
 class cromossomo():
-    def __init__ (self, pesosIniciais):
+    def __init__ (self, pesosIniciais, ambiente):
         #Funçao de Custo
         self.custoTotal = 0
         self.custoS = 0
@@ -27,11 +29,44 @@ class cromossomo():
         self.cromossomo_size = 18
         self.genes = []
 
-        for j in range(self.cromossomo_size):
-            if(j < self.cromossomo_size/2):
-                self.genes.append(1)
-        for peso in pesos:
-            self.genes.append(peso)
+
+	if ambiente == 'A':
+	
+		for j in range(self.cromossomo_size):
+		    if j < 8:
+		        self.genes.append(0)
+		    if j == 8:
+		        self.genes.append(1)		    
+		        
+		for peso in pesos:
+		    self.genes.append(peso)	
+		    [0, 0, 0, 0.01040054, -0.04792563, 0, -0.01267523, 0.38550514, 0]
+	elif ambiente == 'H':
+		for j in range(self.cromossomo_size):
+		    if j == 0 or j == 1 or j == 2 or j == 5 or j == 8:
+		        self.genes.append(0)
+		    elif j == 3 or j == 4 or j == 6 or j == 7:
+		        self.genes.append(1)		    
+		        
+		for peso in pesos:
+		    self.genes.append(peso)	
+		    
+	elif ambiente == 'I':
+		for j in range(self.cromossomo_size):
+		    if j == 0 or j == 1 or j == 2 or j == 5:
+		        self.genes.append(0)
+		    elif j == 3 or j == 4 or j == 6 or j == 7 or j == 8:
+		        self.genes.append(1)		    
+		        
+		for peso in pesos:
+		    self.genes.append(peso)	
+	else:
+		for j in range(self.cromossomo_size):
+		    if(j < self.cromossomo_size/2):
+		        self.genes.append(1)
+		        
+		for peso in pesos:
+		    self.genes.append(peso)
 
     def setGenes(self, posicao, valor):
         self.genes[posicao] = valor
@@ -40,21 +75,28 @@ class cromossomo():
         return self.genes
 
     def setFitness(self, fitness):
-        if self.fitness > fitness:
-            self.fitness = fitness
+        #if self.fitness > fitness:
+ 	self.fitness = fitness
 
     def getFitness(self):
         return self.fitness
 
     def setParam(self, Col, Osc, Lng, Arr, Clr):
         self.Col = Col
+        print "Cromossomo Col: ", Col
         self.Osc = Osc
+        print "Cromossomo Osc: ", Osc
         self.Lng = Lng
+        print "Cromossomo Lng: ", Lng
         self.Arr = Arr
+        print "Cromossomo Arr: ", Arr
         self.Clr = Clr
+        print "Cromossomo Clr: ", Clr        
 
 class EP:
     def __init__(self, pesosIniciais, ambiente, posicaoInicial):
+    	global amb 
+    	amb = ambiente
         self.population = []
         self.population_size = 20
         self.generations = 200
@@ -87,7 +129,16 @@ class EP:
         for generation in range(self.generations):
             self.next_generation = []
             print "Generation: "+str(generation)
-
+            
+	    if os.path.isfile("best_fitness"+amb+".txt"):
+		arquivo = open("best_fitness"+amb+".txt", 'a+')
+		arquivo.write(str(self.best_fitness)+'\n')
+		arquivo.close()
+	    else:
+		arquivo = open("best_fitness"+amb+".txt", 'w+')
+		arquivo.write(str(self.best_fitness)+'\n')
+		arquivo.close()
+		
             #CHECA SE JA TERMINOU
             for cromossomo in self.population:
                 if self.best_fitness <= 50.0:
@@ -128,8 +179,9 @@ class EP:
             self.population = list(self.next_generation)
 
     def iniciaPopulacao(self, population_size, pesos):
+    	global amb
         for i  in range(population_size):
-            self.population.append(cromossomo(pesos))
+            self.population.append(cromossomo(pesos, amb))
         print "----------POPULACAO INICIAL-------------"
 
         for individuo in self.population:
@@ -149,11 +201,14 @@ class EP:
             cromossomo.custoP = cromossomo.custoP + cromossomo.Q4*100
 
         cromossomo.custoP =  cromossomo.custoP + cromossomo.Q2*(cromossomo.Osc*0.1) + cromossomo.Q3*cromossomo.Lng + cromossomo.Q5*cromossomo.Clr
-
+        print "Custo_P:", cromossomo.custoP
+        
     def verificaCusto_S(self, cromossomo):
+	cromossomo.custoS = 0
         for i in range(cromossomo.cromossomo_size):
             if(i < 9):
                 cromossomo.custoS  = cromossomo.custoS + cromossomo.getGenes()[i]
+        print "Custo_S:", cromossomo.custoS
 
     def selection(self):
         print "---------ELITISMO---------"
@@ -167,8 +222,14 @@ class EP:
         for cromossomo in self.population:
             self.fitness_list.append(cromossomo.fitness)
         self.fitness_list = sorted(self.fitness_list)
+        
+        for cromossomo in self.next_generation:
+            self.fitness_list.append(cromossomo.fitness)
+        self.fitness_list = sorted(self.fitness_list)
+        
         print "MELHOR FITNESS: ", self.fitness_list[0]
         self.best_fitness = self.fitness_list[0]
+        
 
     def elitism(self):
         #Rank-based
@@ -230,8 +291,8 @@ class EP:
             print "------MUTOU-------"
             for i in range(self.mutation_rate):
                 gene = random.randint(cromossomo.cromossomo_size/2, cromossomo.cromossomo_size-1)
-
-                while(gene in genesMutados):
+                
+                while(gene in genesMutados or cromossomo.getGenes()[gene] == 0):
                    gene = random.randint(cromossomo.cromossomo_size/2, cromossomo.cromossomo_size-1)
                 print "Gene mutado: ", gene
                 incremento = (cromossomo.getGenes()[gene])*self.intensidadeMutacao

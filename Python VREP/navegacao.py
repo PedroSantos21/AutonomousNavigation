@@ -79,48 +79,56 @@ model.append(load_model('Redes/SLP_D.h5'))
 model.append(load_model('Redes/SLP_E.h5'))
 model.append(load_model('Redes/SLP_F.h5'))
 model.append(load_model('Redes/SLP_G.h5'))
+model.append(load_model('Redes/SLP_I_2.h5'))
 model.append(load_model('Redes/SLP_H.h5'))
-model.append(load_model('Redes/SLP_I.h5'))
-model.append(load_model('Redes/SLP_A.h5'))
 
+
+slp_model = []
+for rede in model:
+	slp_model.append(Model(inputs=rede.input, outputs=rede.output))
 
 def calcula_saida(pesos_blending, entradas):
     global model
     indice2rede = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I', 'H']
     saida = 0
-    output = 0
     filtro = 1
     entrada_rede = []
-
+    
     for i in range(len(pesos_blending)):
-	
+	print "Peso Rede ", indice2rede[i],": ",pesos_blending[i]
+               
         #se há um peso, calcula o output
         if pesos_blending[i] != 0:
+        
             #excecoes de entradas de algumas redes
-            if indice2rede[i] == 'A':
-                entrada_rede.append(entradas[8])
+            if indice2rede[i] == 'A':            	
+            	filtro = 10
+                #entrada_rede.append(entradas[8])
             elif indice2rede[i] == 'C':
-                filtro = 0.3
-                for j in range(len(entradas)):
-                    if j != 1 and j != 6:
-                        entrada_rede.append(entrada[j])
-            elif indice2rede[i] == 'F':
-                filtro = 0.4
-            elif indice2rede[i] == 'G':
-                for j in range(len(entradas)):
-                    if j != 2 and j != 5:
-                        entrada_rede.append(entrada[j])
-            else:
-                for entrada in entradas:
-                    entrada_rede.append(entrada)
-	     
-            slp_model = Model(inputs=model[i].input, outputs=model[i].output)    
-            output = slp_model.predict(np.array([entrada_rede]), batch_size=1, verbose=0, steps=None)
+                filtro = 0.3     		          
+                      
+	    elif indice2rede[i] == 'F':
+               filtro = 0.4
+            elif indice2rede[i] == 'I':    
+            	filtro = 0
+            for entrada in entradas:
+               entrada_rede.append(entrada)
+                    
+	    output = slp_model[i].predict(np.array([entrada_rede]), batch_size=1, verbose=0, steps=None)
+	    	    
+	    if indice2rede[i] == 'H':
+	       	#if(pesos_blending[i] > 0.5):
+		output = 0.2
+		#else:
+		#	output = 0.0
+
+	    
+            output = output * pesos_blending[i]
             #print "Saida da rede ", indice2rede[i]," = ", math.degrees(output*math.pi)
             #print "Filtro = ", filtro
             if (abs(math.degrees(output*math.pi)) > filtro):
                 saida = saida + output
-
+	    entrada_rede = []
             filtro = 1
     return saida
 
@@ -211,12 +219,33 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = -2.3
 	elif padrao == 'H':
 		if posInicial == '1':
-			xAlvo = 2.5
-			yAlvo = 0.0
+			#xAlvo = 2.5
+			#yAlvo = 0.0
+			xAlvo = -0.35
+			yAlvo = 1.86
 	elif padrao == 'I':
 		if posInicial == '1':
 			xAlvo = 4.9
 			yAlvo = 0.0
+	elif padrao == 'PAI':
+		if posInicial == '1':
+			xAlvo = 7.8
+			yAlvo = 0.0
+		elif posInicial == '2':
+			xAlvo = 8.2
+			yAlvo = -1.0
+		elif posInicial == '3':
+			xAlvo = 8.2
+			yAlvo = 2.6
+		elif posInicial == '4':
+			xAlvo = 1.65
+			yAlvo = -3.5
+		elif posInicial == '5':
+			xAlvo = -0.9
+			yAlvo = -3.3
+		elif posInicial == '6':
+			xAlvo = 1.5
+			yAlvo = 7.8
 
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
@@ -296,10 +325,11 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 		entradas.append(thetaAlvo/(math.pi))
 		#print "x: "+str(xRobo)+" y: "+str(yRobo)+" ThetaRobo: "+str(thetaRobo)
-		print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
+		#print "ThetaAlvo: "+str(math.degrees(thetaAlvo))
 
 		output = calcula_saida(pesos_blending, entradas)
 		saidas.append(output)
+		
 		#if abs(math.degrees(output*math.pi)) > 1:
 		virar(output*math.pi)
 
@@ -307,7 +337,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 			if (saidas[len(saidas)-1] > 0 and saidas[len(saidas)-2] < 0 and saidas[len(saidas)-3] > 0) or (saidas[len(saidas)-1] < 0 and saidas[len(saidas)-2] > 0 and saidas[len(saidas)-3] < 0):
 				oscilacoes = oscilacoes+1
 
-		print "Saida: ", math.degrees(output*math.pi)
+		#print "Saida: ", math.degrees(output*math.pi)
 
 		if ((time.time() - inicio) > 200) and not atingiu:
 			#v_Left = 0.0

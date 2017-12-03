@@ -58,7 +58,7 @@ else:
 localizacao = localization.localizacao()
 localization.iniciar(clientID)
 
-model =  load_model('Redes/MLP_I.h5')# create the original model
+model =  load_model('Redes/SLP_I_2.h5')# create the original model
 slp_model = Model(inputs=model.input, outputs=model.output)
 layer = slp_model.get_layer(name=None, index=1)
 print layer.get_weights()
@@ -138,8 +138,8 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 0.78
 	elif padrao == 'D':
 		if posInicial == '1':
-			xAlvo = 0.74
-			yAlvo = 3.5
+			xAlvo = 0.34
+			yAlvo = 2.92
 	elif padrao == 'E':
 		if posInicial == '1':
 			xAlvo = 0.6
@@ -154,12 +154,17 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = -2.3
 	elif padrao == 'H':
 		if posInicial == '1':
-			xAlvo = 2.5
-			yAlvo = 0.0
+			#xAlvo = -2.5
+			#yAlvo = 0.0
+			xAlvo = -0.35
+			yAlvo = 1.86
 	elif padrao == 'I':
 		if posInicial == '1':
 			xAlvo = 4.9
 			yAlvo = 0.0
+		if posInicial == '2':
+			xAlvo = 2.4
+			yAlvo = -0.9
 
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
@@ -212,7 +217,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 		#for da PARAMETRIZACAO
 		for n in range(len(dist)):
 			dist[n] = dist[n]/5.0
-			#if n == 2 or n == 5 or n == 7:
+			#if n == 3 or n == 4 or n == 6 or n == 7:
 			entradas.append(dist[n])
 			if(dist[n] <= 0.01):
 				colisao = True
@@ -248,7 +253,7 @@ while vrep.simxGetConnectionId(clientID) != -1:
 
 		print "Saida: ", math.degrees(output*math.pi)
 
-		if ((time.time() - inicio) > 30) and not atingiu:
+		if ((time.time() - inicio) > 300) and not atingiu:
 			#v_Left = 0.0
 			#v_Right = 0.0
 			print "TIMEOUT"

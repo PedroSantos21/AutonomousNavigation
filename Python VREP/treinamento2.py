@@ -25,6 +25,7 @@ colisao = False
 atingiu = False
 esperando = False
 clearance = 0
+
 if (clientID!=-1):
 	print ("Servidor Conectado!")
 
@@ -178,28 +179,38 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			yAlvo = 0.78
 	elif padrao == 'D':
 		if posInicial == '1':
-			xAlvo = 0.74
-			yAlvo = 3.5
+			xAlvo = 1.8
+			yAlvo = 2
 	elif padrao == 'E':
 		if posInicial == '1':
 			xAlvo = 0.5
 			yAlvo = -3.2
 	elif padrao == 'F':
 		if posInicial == '1':
-			xAlvo = 2.5
-			yAlvo = 5.6
+			xAlvo = 1.9
+			yAlvo = -0.5
 	elif padrao == 'G':
 		if posInicial == '1':
 			xAlvo = 6.0
 			yAlvo = -2.3
 	elif padrao == 'H':
 		if posInicial == '1':
-			xAlvo = 2.5
-			yAlvo = 0.0
+			#xAlvo = -2.5
+			#yAlvo = 0.0
+			xAlvo = -0.35
+			yAlvo = 1.86
 	elif padrao == 'I':
 		if posInicial == '1':
 			xAlvo = 4.9
 			yAlvo = 0.0
+		elif posInicial == '2':
+			xAlvo = 2.4
+			yAlvo = -0.9
+		elif posInicial == '3':
+			xAlvo = 1.4
+			yAlvo = -0.45
+
+		
 	if(xAlvo > xRobo):
 		thetaAlvo =  - thetaRobo + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	else:
@@ -207,11 +218,11 @@ def getThetaAlvo(thetaRobo, xRobo, yRobo):
 			thetaAlvo = -thetaRobo + math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 		else:
 			thetaAlvo = -thetaRobo - math.pi + math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
-
+	
 	#thetaAlvo = math.atan((yAlvo - yRobo)/(xAlvo - xRobo))
 	if (abs(xRobo - xAlvo) < tolerancia) and (abs(yRobo - yAlvo) < tolerancia):
 		thetaAlvo = 0
-
+	
 	return thetaAlvo
 
 
